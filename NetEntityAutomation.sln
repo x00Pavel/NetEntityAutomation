@@ -1,0 +1,34 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FSM", "FSM\FSM.csproj", "{4EA7FFF7-34CF-4442-BB84-337865FB6A45}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Room", "Room\Room.csproj", "{C59E6E0B-DCE7-48FD-86D9-57ADB0A5390F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Events", "Events\Events.csproj", "{814D8335-4E18-4B53-912C-C4FF1F5234D5}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{4EA7FFF7-34CF-4442-BB84-337865FB6A45}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4EA7FFF7-34CF-4442-BB84-337865FB6A45}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4EA7FFF7-34CF-4442-BB84-337865FB6A45}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4EA7FFF7-34CF-4442-BB84-337865FB6A45}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C59E6E0B-DCE7-48FD-86D9-57ADB0A5390F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C59E6E0B-DCE7-48FD-86D9-57ADB0A5390F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C59E6E0B-DCE7-48FD-86D9-57ADB0A5390F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C59E6E0B-DCE7-48FD-86D9-57ADB0A5390F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{814D8335-4E18-4B53-912C-C4FF1F5234D5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{814D8335-4E18-4B53-912C-C4FF1F5234D5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{814D8335-4E18-4B53-912C-C4FF1F5234D5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{814D8335-4E18-4B53-912C-C4FF1F5234D5}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
