@@ -1,0 +1,25 @@
+name: Publish Nuget package
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+ 
+jobs:
+  publish:
+    name: build, pack & publish
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+       
+      - name: Get version from tag
+        uses: nowsprinting/check-version-format-action@v3
+        id: version
+        with:
+          prefix: 'v'
+       
+      - name: Package nuget
+        run: dotnet pack -p:PackageVersion=${{ steps.version.outputs.full_without_prefix }} --configuration Release --output ./nuget
+      
+      - name: Push nuget
+        run: dotnet nuget push ./nuget/*.nupkg --source https://nuget.pkg.github.com/x00Pavel/index.json --api-key ${{ secrets.GH_NUGET_TOKEN }}
