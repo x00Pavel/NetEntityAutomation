@@ -7,14 +7,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="JoySoftware.NetDaemon.HassModel" Version="21.47.1" />
-      <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
-      <PackageReference Include="Stateless" Version="5.13.0" />
-    </ItemGroup>
-
-    <ItemGroup>
       <ProjectReference Include="..\..\..\x00Pavel-netdaemon\src\HassModel\NetDeamon.HassModel\NetDaemon.HassModel.csproj" />
-      <ProjectReference Include="..\LightExtensionMethods\LightExtensionMethods.csproj" />
     </ItemGroup>
 
 </Project>
