@@ -1,9 +1,9 @@
 ﻿using System.Reactive.Linq;
+using FSM;
 using Microsoft.Extensions.Logging;
 using NetDaemon.HassModel;
 using NetDaemon.HassModel.Entities;
 using NetEntityAutomation.Events;
-using NetEntityAutomation.FSM;
 
 namespace LightAutomation;
 
@@ -20,7 +20,7 @@ public class LightAutomation
     private IHaContext _haContext;
     private readonly ILogger _logger;
     private readonly LightAutomationConfiguration _config;
-    private MotionSwitchLightFSM _fsm;
+    private MotionSwitchLightFsm _fsm;
     private IObservable<StateChange> MotionSensorEvent =>
         _haContext.StateChanges().Where(e => e.New?.EntityId == _config.MotionSensors.EntityId);
     private IObservable<ZhaEventData> SwitchEvent =>
@@ -33,7 +33,12 @@ public class LightAutomation
         _haContext = ha;
         _logger = logger;
         _config = config;
-        _fsm = new MotionSwitchLightFSM(logger, config.Lights);
+        var fsmConfig = new FsmConfig
+        {
+            Lights = config.Lights,
+        };
+        
+        _fsm = new MotionSwitchLightFsm(logger, fsmConfig);
         InitFsmTransitions();
         logger.LogInformation("LightAutomation initialised");
     }
