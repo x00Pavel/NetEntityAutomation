@@ -14,10 +14,13 @@ public record FsmConfig
     public long WaitForOffSeconds { get; init; } = 180;
     public long WaitForOffMinutes { get; init; } = 0;
     public MotionSwitchLightFsm.FsmState InitialState { get; init; } = MotionSwitchLightFsm.FsmState.Off;
+    
     /// <summary> When the automation starts </summary>
-    public TimeSpan StartAtTime { get; init; } = DateTime.Parse("20:00:00").TimeOfDay;
+    public TimeSpan StartAtTime { get; init; } = DateTime.Parse("21:00:00").TimeOfDay;
+    
     /// <summary> When the automation stops </summary>
-    public TimeSpan StopAtTime { get; init; } = DateTime.Parse("08:00:00").TimeOfDay;
+    public TimeSpan StopAtTime { get; init; } = DateTime.Parse("06:00:00").TimeOfDay;
+    
     /// <summary> Add custom behaviour during the night </summary>
     public bool NightMode { get; init; } = false;
     
@@ -55,9 +58,10 @@ public class MotionSwitchLightFsm
     
     private IDisposable? _timer;
     private readonly FsmConfig _config;
-    private const string StoragePath = ".storage/fsm.json";
+    private const string StoragePath = "storage/fsm.json";
     private const long WaitTime = 30;
-    private bool NotWorkingHours() => _config.StopAtTime <= DateTime.Now.TimeOfDay && DateTime.Now.TimeOfDay <= _config.StartAtTime;
+    private bool NotWorkingHours() => !(_config.StopAtTime <= DateTime.Now.TimeOfDay && DateTime.Now.TimeOfDay <= _config.StartAtTime);
+
     public MotionSwitchLightFsm(ILogger logger, FsmConfig config)
     {
         _logger = logger;
@@ -145,23 +149,12 @@ public class MotionSwitchLightFsm
     
     public void SwitchOn()
     {
-        if (NotWorkingHours())
-        {
-            _logger.LogInformation("[FSM] Not working hours {Now}, ignoring switch on", DateTime.Now.TimeOfDay);
-            return;
-        }
         _logger.LogInformation("[FSM] Switching on");
         _stateMachine.Fire(FsmTrigger.SwitchOn);
     }
 
     public void SwitchOff()
     {
-        if (NotWorkingHours())
-        {
-            _logger.LogInformation("[FSM] Not working hours {Now}, ignoring switch off", DateTime.Now.TimeOfDay);
-            return;
-        }
-        
         _logger.LogInformation("[FSM] Switching off");
         _stateMachine.Fire(FsmTrigger.SwitchOff);
     }
