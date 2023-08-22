@@ -9,18 +9,22 @@ namespace FSM;
 
 public record FsmConfig
 {
-    public long HoldTimeSeconds { get; init; } = 30;
+    public long HoldTimeSeconds { get; init; } = 360;
     public long HoldTimeMinutes { get; init; } = 0;
-    public long WaitForOffSeconds { get; init; } = 30;
+    public long WaitForOffSeconds { get; init; } = 180;
     public long WaitForOffMinutes { get; init; } = 0;
     public MotionSwitchLightFsm.FsmState InitialState { get; init; } = MotionSwitchLightFsm.FsmState.Off;
-    public DateTime StartAtTime { get; init; } = DateTime.Parse("20:00:00");
-    public DateTime StopAtTime { get; init; } = DateTime.Parse("08:00:00");
-
+    /// <summary> When the automation starts </summary>
+    public TimeSpan StartAtTime { get; init; } = DateTime.Parse("20:00:00").TimeOfDay;
+    /// <summary> When the automation stops </summary>
+    public TimeSpan StopAtTime { get; init; } = DateTime.Parse("08:00:00").TimeOfDay;
+    /// <summary> Add custom behaviour during the night </summary>
     public bool NightMode { get; init; } = false;
+    
+    /// <summary> Sun entity from Home Assistant </summary>
     public object Sun { get; init; } = null!;
 
-    public required IEnumerable<IOnOffTarget> Lights { get; init; }
+    public required IEnumerable<ILightEntityCore> Lights { get; init; }
 }
 
 public class MotionSwitchLightFsm
@@ -44,16 +48,16 @@ public class MotionSwitchLightFsm
         TimeElapsed
     }
 
-    public FsmState State => _stateMachine.State;
+    private FsmState State => _stateMachine.State;
     private readonly StateMachine<FsmState, FsmTrigger> _stateMachine;
     
-    private readonly IEnumerable<IOnOffTarget> _lights;
+    private readonly IEnumerable<ILightEntityCore> _lights;
     
     private IDisposable? _timer;
     private readonly FsmConfig _config;
-    private const string StoragePath = "storage/fsm.json";
+    private const string StoragePath = ".storage/fsm.json";
     private const long WaitTime = 30;
-    
+    private bool NotWorkingHours() => _config.StopAtTime <= DateTime.Now.TimeOfDay && DateTime.Now.TimeOfDay <= _config.StartAtTime;
     public MotionSwitchLightFsm(ILogger logger, FsmConfig config)
     {
         _logger = logger;
@@ -81,8 +85,8 @@ public class MotionSwitchLightFsm
             .Ignore(FsmTrigger.SwitchOff)
             .Ignore(FsmTrigger.MotionOff)
             .Ignore(FsmTrigger.TimeElapsed)
-            .Permit(FsmTrigger.MotionOn, FsmState.OnByMotion)
-            .Permit(FsmTrigger.SwitchOn, FsmState.OnBySwitch);
+            .PermitIf(FsmTrigger.MotionOn, FsmState.OnByMotion, NotWorkingHours)
+            .PermitIf(FsmTrigger.SwitchOn, FsmState.OnBySwitch, NotWorkingHours);
 
         _stateMachine.Configure(FsmState.OnByMotion)
             .OnEntry(TurnOnLights)
@@ -95,7 +99,7 @@ public class MotionSwitchLightFsm
         _stateMachine.Configure(FsmState.OnBySwitch)
             .OnEntry(TurnOnLights)
             .OnEntry(() => StartTimer(_config.HoldTimeSeconds))
-            .Ignore(FsmTrigger.MotionOn)
+            .PermitReentry(FsmTrigger.MotionOn)
             .Ignore(FsmTrigger.MotionOff)
             .PermitReentry(FsmTrigger.SwitchOn)
             .Permit(FsmTrigger.SwitchOff, FsmState.Off)
@@ -140,55 +144,39 @@ public class MotionSwitchLightFsm
     
     
     public void SwitchOn()
-    {   
-        if (_config.StartAtTime <=  DateTime.Now && DateTime.Now <= _config.StopAtTime)
+    {
+        if (NotWorkingHours())
         {
-            _logger.LogInformation("[FSM] Switching on");
-            _stateMachine.Fire(FsmTrigger.SwitchOn);
+            _logger.LogInformation("[FSM] Not working hours {Now}, ignoring switch on", DateTime.Now.TimeOfDay);
+            return;
         }
-        else
-        {
-            _logger.LogInformation("Automation is not started at this time");
-        }
+        _logger.LogInformation("[FSM] Switching on");
+        _stateMachine.Fire(FsmTrigger.SwitchOn);
     }
 
     public void SwitchOff()
     {
-        if (_config.StartAtTime <= DateTime.Now && DateTime.Now <= _config.StopAtTime)
+        if (NotWorkingHours())
         {
-            _logger.LogInformation("[FSM] Switching off");
-            _stateMachine.Fire(FsmTrigger.SwitchOff);
+            _logger.LogInformation("[FSM] Not working hours {Now}, ignoring switch off", DateTime.Now.TimeOfDay);
+            return;
         }
-        else
-        {
-            _logger.LogInformation("Automation is not started at this time");
-        }
+        
+        _logger.LogInformation("[FSM] Switching off");
+        _stateMachine.Fire(FsmTrigger.SwitchOff);
     }
 
     public void MotionOn()
     {
-        if (_config.StartAtTime <= DateTime.Now && DateTime.Now <= _config.StopAtTime)
-        {
-            _logger.LogInformation("[FSM] Motion on");
-            _stateMachine.Fire(FsmTrigger.MotionOn);
-        }
-        else
-        {
-            _logger.LogInformation("Automation is not started at this time");
-        }
+        _logger.LogInformation("[FSM] Motion on");
+        _stateMachine.Fire(FsmTrigger.MotionOn);
     }
 
     public void MotionOff()
     {
-        if (_config.StartAtTime <= DateTime.Now && DateTime.Now <= _config.StopAtTime)
-        {
+
             _logger.LogInformation("[FSM] Motion off");
             _stateMachine.Fire(FsmTrigger.MotionOff);
-        }
-        else
-        {
-            _logger.LogInformation("Automation is not started at this time");
-        }
     }
 
     public void TimeElapsed()
