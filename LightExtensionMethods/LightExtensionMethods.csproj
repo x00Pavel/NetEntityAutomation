@@ -7,7 +7,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\..\..\x00Pavel-netdaemon\src\HassModel\NetDeamon.HassModel\NetDaemon.HassModel.csproj" />
+      <PackageReference Include="JoySoftware.NetDaemon.HassModel" Version="23.33.0" />
     </ItemGroup>
 
 </Project>
