@@ -7,11 +7,11 @@ using NetEntityAutomation.Events;
 
 namespace LightAutomation;
 
-public record LightAutomationConfiguration(string Name, List<ILightEntity> LightEntities, IBinarySensorEntity Sensor, string SwitchId)
+public record LightAutomationConfiguration(string Name, List<ILightEntityCore> LightEntities, IBinarySensorEntityCore Sensor, string SwitchId)
 {
     public string? Name { get; init; } = Name;
-    public IEnumerable<ILightEntity> Lights { get; init; } = LightEntities;
-    public IBinarySensorEntity MotionSensors { get; init; } = Sensor;
+    public IEnumerable<ILightEntityCore> Lights { get; init; } = LightEntities;
+    public IBinarySensorEntityCore MotionSensors { get; init; } = Sensor;
     public string Switch { get; init; } = SwitchId;
 }
 
