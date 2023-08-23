@@ -8,7 +8,7 @@
 
     <ItemGroup>
       <ProjectReference Include="..\Events\Events.csproj" />
-      <ProjectReference Include="..\FSM\FSM.csproj" />
+      <ProjectReference Include="..\LightFsm\LightFsm.csproj" />
       <ProjectReference Include="..\LightExtensionMethods\LightExtensionMethods.csproj" />
     </ItemGroup>
 
