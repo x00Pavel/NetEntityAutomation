@@ -6,10 +6,7 @@ name: Test local runner
 on:
   # Triggers the workflow on push or pull request events but only for the $default-branch branch
   push:
-    branches: [ $default-branch ]
-  pull_request:
-    branches: [ $default-branch ]
-
+    branches: main
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
@@ -27,4 +24,4 @@ jobs:
 
       # Runs a single command using the runners shell
       - name: Check connection to docker registry
-        run: wget localhost:5001/v2/_catalog
+        run: wget -O - localhost:5001/v2/_catalog
