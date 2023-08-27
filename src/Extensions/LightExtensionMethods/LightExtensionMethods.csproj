@@ -4,12 +4,11 @@
         <TargetFramework>net7.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
+        <RootNamespace>NetEntityAutomation.Extensions.LightExtensionMethods</RootNamespace>
     </PropertyGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\Events\Events.csproj" />
-      <ProjectReference Include="..\LightFsm\LightFsm.csproj" />
-      <ProjectReference Include="..\LightExtensionMethods\LightExtensionMethods.csproj" />
+      <PackageReference Include="JoySoftware.NetDaemon.HassModel" Version="23.33.0" />
     </ItemGroup>
 
 </Project>

@@ -4,7 +4,9 @@
         <TargetFramework>net7.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
-        <RootNamespace>FSM</RootNamespace>
+        <RootNamespace>NetEntityAutomation.FSM.LightFsm</RootNamespace>
+        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+        <Authors>Pavel Yadlouski</Authors>
     </PropertyGroup>
 
     <ItemGroup>
@@ -14,7 +16,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\LightExtensionMethods\LightExtensionMethods.csproj" />
+      <ProjectReference Include="..\..\Extensions\LightExtensionMethods\LightExtensionMethods.csproj" />
     </ItemGroup>
 
 </Project>
