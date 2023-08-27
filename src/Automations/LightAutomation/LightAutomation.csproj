@@ -8,6 +8,7 @@
         <Authors>Pavel Yadlouski</Authors>
         <PackageProjectUrl>https://github.com/x00Pavel/NetEntityAutomation</PackageProjectUrl>
         <RepositoryUrl>https://github.com/x00Pavel/NetEntityAutomation</RepositoryUrl>
+        <AssemblyName>NetEntityAutomation.Automations.LightAutomation</AssemblyName>
     </PropertyGroup>
 
     <ItemGroup>
