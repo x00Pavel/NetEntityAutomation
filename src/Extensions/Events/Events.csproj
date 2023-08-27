@@ -4,6 +4,11 @@
         <TargetFramework>net7.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
+        <RootNamespace>NetEntityAutomation.Extesions.Events</RootNamespace>
+        <Authors>Pavel Yadlouski</Authors>
+        <PackageProjectUrl>https://github.com/x00Pavel/NetEntityAutomation</PackageProjectUrl>
+        <RepositoryUrl>https://github.com/x00Pavel/NetEntityAutomation</RepositoryUrl>
+        <AssemblyName>NetEntityAutomation.Extesions.Events</AssemblyName>
     </PropertyGroup>
 
 </Project>
