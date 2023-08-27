@@ -1,6 +1,6 @@
 ﻿using NetDaemon.HassModel.Entities;
 
-namespace LightExtensionMethods;
+namespace NetEntityAutomation.Extensions.LightExtensionMethods;
 
 public static class LightExtensionMethods
 {

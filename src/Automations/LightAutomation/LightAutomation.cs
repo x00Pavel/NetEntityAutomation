@@ -1,11 +1,11 @@
 ﻿using System.Reactive.Linq;
-using FSM;
+using Events;
 using Microsoft.Extensions.Logging;
 using NetDaemon.HassModel;
 using NetDaemon.HassModel.Entities;
-using NetEntityAutomation.Events;
+using NetEntityAutomation.FSM.LightFsm;
 
-namespace LightAutomation;
+namespace NetEntityAutomation.Automations.LightAutomation;
 
 public record LightAutomationConfiguration(string Name, List<ILightEntityCore> LightEntities, IBinarySensorEntityCore Sensor, string SwitchId)
 {

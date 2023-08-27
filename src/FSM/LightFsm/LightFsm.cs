@@ -1,11 +1,11 @@
 ﻿using System.Reactive.Linq;
-using LightExtensionMethods;
 using Microsoft.Extensions.Logging;
 using NetDaemon.HassModel.Entities;
+using NetEntityAutomation.Extensions.LightExtensionMethods;
 using Newtonsoft.Json;
 using Stateless;
 
-namespace FSM;
+namespace NetEntityAutomation.FSM.LightFsm;
 
 public record FsmConfig
 {
@@ -54,7 +54,7 @@ public class MotionSwitchLightFsm
     private FsmState State => _stateMachine.State;
     private readonly StateMachine<FsmState, FsmTrigger> _stateMachine;
     
-    private readonly IEnumerable<ILightEntityCore> _lights;
+    private readonly IEnumerable<ILightEntityCore>? _lights;
     
     private IDisposable? _timer;
     private readonly FsmConfig _config;
@@ -129,14 +129,14 @@ public class MotionSwitchLightFsm
     private void TurnOnLights()
     {   
         _logger.LogInformation("[FSM] Turning on lights");
-        _lights.TurnOn();
+        _lights?.TurnOn();
         _timer?.Dispose();
     }
     
     private void TurnOffLights()
     {
         _logger.LogInformation("[FSM] Turning off lights");
-        _lights.TurnOff();
+        _lights?.TurnOff();
         _timer?.Dispose();
     }
     

@@ -1,7 +1,7 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace NetEntityAutomation.Events;
+namespace Events;
 
 public record ZhaEventData
 {
