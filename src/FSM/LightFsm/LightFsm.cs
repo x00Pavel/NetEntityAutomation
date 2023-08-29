@@ -76,6 +76,7 @@ public class MotionSwitchLightFsm
         _stateMachine = new StateMachine<FsmState, FsmTrigger>(FsmState.Off);
         _lights = config.Lights;
         Config = config;
+        logger.LogDebug("FSM configuration: {Config}", config);
         InitFSM();
     }
 
