@@ -9,25 +9,34 @@ namespace NetEntityAutomation.FSM.LightFsm;
 
 public record FsmConfig
 {
+    private const string DefaultStartTime = "19:00:00";
+    private const string DefaultStopTime = "06:00:00";
     public long HoldTimeSeconds { get; init; } = 360;
     public long HoldTimeMinutes { get; init; } = 0;
     public long WaitForOffSeconds { get; init; } = 180;
     public long WaitForOffMinutes { get; init; } = 0;
     public MotionSwitchLightFsm.FsmState InitialState { get; init; } = MotionSwitchLightFsm.FsmState.Off;
 
-    /// <summary> When the automation starts </summary>
-    public TimeSpan StartAtTime { get; init; } = DateTime.Parse("19:00:00").TimeOfDay;
-
-    /// <summary> When the automation stops </summary>
-    public TimeSpan StopAtTime { get; init; } = DateTime.Parse("06:00:00").TimeOfDay;
-
     /// <summary> Add custom behaviour during the night </summary>
     public bool NightMode { get; init; } = false;
-
-    /// <summary> Sun entity from Home Assistant </summary>
-    public object Sun { get; init; } = null!;
-
+    
     public required IEnumerable<ILightEntityCore> Lights { get; init; }
+    
+    /// <summary> Function that dynamically returns the start time </summary>
+    public Func<TimeSpan> StartAtTimeFunc { get; set; } = () => DateTime.Parse(DefaultStartTime).TimeOfDay;
+    
+    /// <summary> Function that dynamically returns the stop time </summary>
+    public Func<TimeSpan> StopAtTimeFunc { get; set; } = () => DateTime.Parse(DefaultStopTime).TimeOfDay;
+
+    internal bool IsWorkingHours
+    {
+        get
+        {   
+            var now = DateTime.Now.TimeOfDay;
+            return now <= StopAtTimeFunc() && now >= StartAtTimeFunc();
+        }
+    }
+
 }
 
 public class MotionSwitchLightFsm
@@ -57,16 +66,15 @@ public class MotionSwitchLightFsm
     private readonly IEnumerable<ILightEntityCore>? _lights;
 
     private IDisposable? _timer;
-    private readonly FsmConfig Config;
+    private readonly FsmConfig _config;
     private const string StoragePath = "storage/fsm.json";
     private const long WaitTime = 30;
 
     private bool NotWorkingHours()
     {   
         var now = DateTime.Now.TimeOfDay;
-        var isWorkingHours = !(Config.StopAtTime <= now && now <= Config.StartAtTime);
-        _logger.LogDebug("Is working {Now} hours: {IsWorkingHours}", now,  isWorkingHours);
-        return isWorkingHours;
+        _logger.LogDebug("Is working {Now} hours: {IsWorkingHours}", now,  _config.IsWorkingHours);
+        return _config.IsWorkingHours;
     }
         
 
@@ -75,7 +83,7 @@ public class MotionSwitchLightFsm
         _logger = logger;
         _stateMachine = new StateMachine<FsmState, FsmTrigger>(FsmState.Off);
         _lights = config.Lights;
-        Config = config;
+        _config = config;
         logger.LogDebug("FSM configuration: {Config}", config);
         InitFSM();
     }
@@ -111,7 +119,7 @@ public class MotionSwitchLightFsm
 
         _stateMachine.Configure(FsmState.OnBySwitch)
             .OnEntry(TurnOnLights)
-            .OnEntry(() => StartTimer(Config.HoldTimeSeconds + Config.HoldTimeMinutes * 60))
+            .OnEntry(() => StartTimer(_config.HoldTimeSeconds + _config.HoldTimeMinutes * 60))
             .PermitReentry(FsmTrigger.MotionOn)
             .Ignore(FsmTrigger.MotionOff)
             .PermitReentry(FsmTrigger.SwitchOn)
@@ -119,7 +127,7 @@ public class MotionSwitchLightFsm
             .Permit(FsmTrigger.TimeElapsed, FsmState.WaitingForMotion);
 
         _stateMachine.Configure(FsmState.WaitingForMotion)
-            .OnEntry(() => StartTimer(Config.WaitForOffSeconds + Config.WaitForOffMinutes * 60))
+            .OnEntry(() => StartTimer(_config.WaitForOffSeconds + _config.WaitForOffMinutes * 60))
             .Ignore(FsmTrigger.MotionOff)
             .Permit(FsmTrigger.MotionOn, FsmState.OnBySwitch)
             .Permit(FsmTrigger.SwitchOn, FsmState.OnBySwitch)
