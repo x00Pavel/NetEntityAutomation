@@ -7,12 +7,12 @@ using NetEntityAutomation.FSM.LightFsm;
 
 namespace NetEntityAutomation.Automations.LightAutomation;
 
-public record LightAutomationConfiguration(string Name, List<ILightEntityCore> LightEntities, IBinarySensorEntityCore Sensor, string SwitchId)
+public record LightAutomationConfiguration(string Name, IBinarySensorEntityCore Sensor, string SwitchId, FsmConfig FsmConfig)
 {
     public string? Name { get; init; } = Name;
-    public IEnumerable<ILightEntityCore> Lights { get; init; } = LightEntities;
     public IBinarySensorEntityCore MotionSensors { get; init; } = Sensor;
     public string Switch { get; init; } = SwitchId;
+    public FsmConfig FsmConfig { get; set; } = FsmConfig;
 }
 
 public class LightAutomation
@@ -33,12 +33,8 @@ public class LightAutomation
         _haContext = ha;
         _logger = logger;
         _config = config;
-        var fsmConfig = new FsmConfig
-        {
-            Lights = config.Lights,
-        };
         
-        _fsm = new MotionSwitchLightFsm(logger, fsmConfig);
+        _fsm = new MotionSwitchLightFsm(logger, _config.FsmConfig);
         InitFsmTransitions();
         logger.LogInformation("LightAutomation initialised");
     }

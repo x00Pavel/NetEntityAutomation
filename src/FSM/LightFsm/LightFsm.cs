@@ -16,7 +16,7 @@ public record FsmConfig
     public MotionSwitchLightFsm.FsmState InitialState { get; init; } = MotionSwitchLightFsm.FsmState.Off;
 
     /// <summary> When the automation starts </summary>
-    public TimeSpan StartAtTime { get; init; } = DateTime.Parse("20:00:00").TimeOfDay;
+    public TimeSpan StartAtTime { get; init; } = DateTime.Parse("19:00:00").TimeOfDay;
 
     /// <summary> When the automation stops </summary>
     public TimeSpan StopAtTime { get; init; } = DateTime.Parse("06:00:00").TimeOfDay;
@@ -61,8 +61,14 @@ public class MotionSwitchLightFsm
     private const string StoragePath = "storage/fsm.json";
     private const long WaitTime = 30;
 
-    private bool NotWorkingHours() =>
-        !(Config.StopAtTime <= DateTime.Now.TimeOfDay && DateTime.Now.TimeOfDay <= Config.StartAtTime);
+    private bool NotWorkingHours()
+    {   
+        var now = DateTime.Now.TimeOfDay;
+        var isWorkingHours = !(Config.StopAtTime <= now && now <= Config.StartAtTime);
+        _logger.LogDebug("Is working {Now} hours: {IsWorkingHours}", now,  isWorkingHours);
+        return isWorkingHours;
+    }
+        
 
     public MotionSwitchLightFsm(ILogger logger, FsmConfig config)
     {
@@ -70,6 +76,7 @@ public class MotionSwitchLightFsm
         _stateMachine = new StateMachine<FsmState, FsmTrigger>(FsmState.Off);
         _lights = config.Lights;
         Config = config;
+        logger.LogDebug("FSM configuration: {Config}", config);
         InitFSM();
     }
 
@@ -92,19 +99,19 @@ public class MotionSwitchLightFsm
             .Ignore(FsmTrigger.MotionOff)
             .Ignore(FsmTrigger.TimeElapsed)
             .PermitIf(FsmTrigger.MotionOn, FsmState.OnByMotion, NotWorkingHours)
-            .PermitIf(FsmTrigger.SwitchOn, FsmState.OnBySwitch, NotWorkingHours);
+            .PermitIf(FsmTrigger.SwitchOn, FsmState.OnBySwitch);
 
         _stateMachine.Configure(FsmState.OnByMotion)
             .OnEntry(TurnOnLights)
             .PermitReentry(FsmTrigger.MotionOn)
             .Ignore(FsmTrigger.TimeElapsed)
             .Permit(FsmTrigger.SwitchOn, FsmState.OnBySwitch)
-            .Permit(FsmTrigger.MotionOff, FsmState.Off)
+            .PermitIf(FsmTrigger.MotionOff, FsmState.Off, NotWorkingHours)
             .Permit(FsmTrigger.SwitchOff, FsmState.Off);
 
         _stateMachine.Configure(FsmState.OnBySwitch)
             .OnEntry(TurnOnLights)
-            .OnEntry(() => StartTimer(Config.HoldTimeSeconds))
+            .OnEntry(() => StartTimer(Config.HoldTimeSeconds + Config.HoldTimeMinutes * 60))
             .PermitReentry(FsmTrigger.MotionOn)
             .Ignore(FsmTrigger.MotionOff)
             .PermitReentry(FsmTrigger.SwitchOn)
@@ -112,19 +119,18 @@ public class MotionSwitchLightFsm
             .Permit(FsmTrigger.TimeElapsed, FsmState.WaitingForMotion);
 
         _stateMachine.Configure(FsmState.WaitingForMotion)
-            .OnEntry(() => StartTimer(Config.WaitForOffSeconds))
+            .OnEntry(() => StartTimer(Config.WaitForOffSeconds + Config.WaitForOffMinutes * 60))
             .Ignore(FsmTrigger.MotionOff)
             .Permit(FsmTrigger.MotionOn, FsmState.OnBySwitch)
             .Permit(FsmTrigger.SwitchOn, FsmState.OnBySwitch)
             .Permit(FsmTrigger.SwitchOff, FsmState.Off)
-            .Permit(FsmTrigger.MotionOff, FsmState.Off)
             .Permit(FsmTrigger.TimeElapsed, FsmState.Off);
-        _logger.LogInformation("[FSM] FSM initialized in state {State}", State);
+        _logger.LogInformation("FSM initialized in state {State}", State);
     }
 
     private void StartTimer(long waitTime = WaitTime)
     {
-        _logger.LogInformation("[FSM] Starting timer for {WaitTime} seconds", waitTime);
+        _logger.LogInformation("Starting timer for {WaitTime} seconds", waitTime);
         _timer?.Dispose();
         _timer = Observable.Timer(TimeSpan.FromSeconds(waitTime))
             .Subscribe(_ => TimeElapsed());
@@ -132,58 +138,58 @@ public class MotionSwitchLightFsm
 
     private void TurnOnLights()
     {
-        _logger.LogInformation("[FSM] Turning on lights");
+        _logger.LogInformation("Turning on lights");
         _lights?.TurnOn();
         _timer?.Dispose();
     }
 
     private void TurnOffLights()
     {
-        _logger.LogInformation("[FSM] Turning off lights");
+        _logger.LogInformation("Turning off lights");
         _lights?.TurnOff();
         _timer?.Dispose();
     }
 
     private void UpdateState()
     {
-        _logger.LogInformation("[FSM] Updating state in storage {State}", State);
+        _logger.LogInformation("Updating state in storage {State}", State);
         File.WriteAllText(StoragePath, ToJson());
     }
 
 
     public void SwitchOn()
     {
-        _logger.LogInformation("[FSM] Switching on");
+        _logger.LogInformation("Switching on");
         _stateMachine.Fire(FsmTrigger.SwitchOn);
     }
 
     public void SwitchOff()
     {
-        _logger.LogInformation("[FSM] Switching off");
+        _logger.LogInformation("Switching off");
         _stateMachine.Fire(FsmTrigger.SwitchOff);
     }
 
     public void MotionOn()
     {
-        _logger.LogInformation("[FSM] Motion on");
+        _logger.LogInformation("Motion on");
         _stateMachine.Fire(FsmTrigger.MotionOn);
     }
 
     public void MotionOff()
     {
-        _logger.LogInformation("[FSM] Motion off");
+        _logger.LogInformation("Motion off");
         _stateMachine.Fire(FsmTrigger.MotionOff);
     }
 
     public void TimeElapsed()
     {
-        _logger.LogInformation("[FSM] Time elapsed");
+        _logger.LogInformation("Time elapsed");
         _stateMachine.Fire(FsmTrigger.TimeElapsed);
     }
 
     private string ToJson()
     {
-        _logger.LogInformation("[FSM] Serializing to JSON");
+        _logger.LogInformation("Serializing to JSON");
         return JsonConvert.SerializeObject(this);
     }
 
