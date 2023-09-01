@@ -33,10 +33,9 @@ public record FsmConfig
         get
         {   
             var now = DateTime.Now.TimeOfDay;
-            return now <= StopAtTimeFunc() && now >= StartAtTimeFunc();
+            return now >= StartAtTimeFunc() || now <= StopAtTimeFunc();
         }
     }
-
 }
 
 public class MotionSwitchLightFsm
@@ -70,9 +69,10 @@ public class MotionSwitchLightFsm
     private const string StoragePath = "storage/fsm.json";
     private const long WaitTime = 30;
 
-    private bool NotWorkingHours()
+    private bool WorkingHours()
     {   
         var now = DateTime.Now.TimeOfDay;
+        _logger.LogDebug("Working hors: {Start} - {Stop}", _config.StartAtTimeFunc(), _config.StopAtTimeFunc() );
         _logger.LogDebug("Is working {Now} hours: {IsWorkingHours}", now,  _config.IsWorkingHours);
         return _config.IsWorkingHours;
     }
@@ -106,7 +106,7 @@ public class MotionSwitchLightFsm
             .PermitReentry(FsmTrigger.SwitchOff)
             .Ignore(FsmTrigger.MotionOff)
             .Ignore(FsmTrigger.TimeElapsed)
-            .PermitIf(FsmTrigger.MotionOn, FsmState.OnByMotion, NotWorkingHours)
+            .PermitIf(FsmTrigger.MotionOn, FsmState.OnByMotion, WorkingHours)
             .PermitIf(FsmTrigger.SwitchOn, FsmState.OnBySwitch);
 
         _stateMachine.Configure(FsmState.OnByMotion)
@@ -114,7 +114,7 @@ public class MotionSwitchLightFsm
             .PermitReentry(FsmTrigger.MotionOn)
             .Ignore(FsmTrigger.TimeElapsed)
             .Permit(FsmTrigger.SwitchOn, FsmState.OnBySwitch)
-            .PermitIf(FsmTrigger.MotionOff, FsmState.Off, NotWorkingHours)
+            .PermitIf(FsmTrigger.MotionOff, FsmState.Off, WorkingHours)
             .Permit(FsmTrigger.SwitchOff, FsmState.Off);
 
         _stateMachine.Configure(FsmState.OnBySwitch)
