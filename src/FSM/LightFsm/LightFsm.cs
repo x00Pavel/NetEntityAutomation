@@ -95,7 +95,7 @@ public class MotionSwitchLightFsm
 
         _stateMachine.Configure(FsmState.Off)
             .OnEntry(TurnOffLights)
-            .Ignore(FsmTrigger.SwitchOff)
+            .PermitReentry(FsmTrigger.SwitchOff)
             .Ignore(FsmTrigger.MotionOff)
             .Ignore(FsmTrigger.TimeElapsed)
             .PermitIf(FsmTrigger.MotionOn, FsmState.OnByMotion, NotWorkingHours)
@@ -159,32 +159,68 @@ public class MotionSwitchLightFsm
 
     public void SwitchOn()
     {
-        _logger.LogInformation("Switching on");
-        _stateMachine.Fire(FsmTrigger.SwitchOn);
+        try
+        {
+            _logger.LogInformation("Switching on");
+            _stateMachine.Fire(FsmTrigger.SwitchOn);
+        }
+        catch (InvalidOperationException e)
+        {
+            _logger.LogInformation(e.Message);
+        }
     }
 
     public void SwitchOff()
     {
-        _logger.LogInformation("Switching off");
-        _stateMachine.Fire(FsmTrigger.SwitchOff);
+        try
+        {
+            _logger.LogInformation("Switching off");
+            _stateMachine.Fire(FsmTrigger.SwitchOff);
+        }
+        catch (InvalidOperationException e)
+        {
+            _logger.LogInformation(e.Message);
+        }
+
     }
 
     public void MotionOn()
     {
-        _logger.LogInformation("Motion on");
-        _stateMachine.Fire(FsmTrigger.MotionOn);
+        try
+        {
+            _logger.LogInformation("Motion on");
+            _stateMachine.Fire(FsmTrigger.MotionOn);
+        }
+        catch (InvalidOperationException e)
+        {
+            _logger.LogInformation(e.Message);
+        }
     }
 
     public void MotionOff()
     {
-        _logger.LogInformation("Motion off");
-        _stateMachine.Fire(FsmTrigger.MotionOff);
+        try
+        {
+            _logger.LogInformation("Motion off");
+            _stateMachine.Fire(FsmTrigger.MotionOff);
+        }
+        catch (InvalidOperationException e)
+        {
+            _logger.LogInformation(e.Message);
+        }
     }
 
     public void TimeElapsed()
     {
-        _logger.LogInformation("Time elapsed");
-        _stateMachine.Fire(FsmTrigger.TimeElapsed);
+        try
+        {
+            _logger.LogInformation("Time elapsed");
+            _stateMachine.Fire(FsmTrigger.TimeElapsed);
+        }
+        catch (InvalidOperationException e)
+        {
+            _logger.LogInformation(e.Message);
+        }
     }
 
     private string ToJson()
