@@ -12,9 +12,9 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\..\Extensions\Events\Events.csproj" />
-      <ProjectReference Include="..\..\FSM\LightFsm\LightFsm.csproj" />
-      <ProjectReference Include="..\..\Extensions\LightExtensionMethods\LightExtensionMethods.csproj" />
+        <ProjectReference Include="..\..\Extensions\Events\Events.csproj"/>
+        <ProjectReference Include="..\..\FSM\LightFsm\LightFsm.csproj"/>
+        <ProjectReference Include="..\..\Extensions\LightExtensionMethods\LightExtensionMethods.csproj"/>
     </ItemGroup>
 
 </Project>
