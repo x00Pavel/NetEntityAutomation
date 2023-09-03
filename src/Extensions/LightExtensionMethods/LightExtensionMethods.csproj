@@ -12,7 +12,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="JoySoftware.NetDaemon.HassModel" Version="23.33.0" />
+        <PackageReference Include="JoySoftware.NetDaemon.HassModel" Version="23.33.0"/>
     </ItemGroup>
 
 </Project>
