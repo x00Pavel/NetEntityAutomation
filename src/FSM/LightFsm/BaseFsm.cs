@@ -52,7 +52,7 @@ public abstract class BaseFsm<TState, TTRigger>
 
     protected void StartTimer(TimeSpan waitTime)
     {
-        Logger.LogInformation("Starting timer for {WaitTime} seconds", waitTime.Seconds);
+        Logger.LogInformation("Starting timer for {WaitTime} seconds", waitTime.TotalSeconds);
         Timer?.Dispose();
         Timer = Observable.Timer(waitTime)
             .Subscribe(_ => TimeElapsed());
