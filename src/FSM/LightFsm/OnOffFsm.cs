@@ -1,9 +1,4 @@
-﻿using System.Reactive.Linq;
-using Microsoft.Extensions.Logging;
-using NetDaemon.HassModel.Entities;
-using NetEntityAutomation.Extensions.LightExtensionMethods;
-using Newtonsoft.Json;
-using Stateless;
+﻿using Microsoft.Extensions.Logging;
 
 namespace NetEntityAutomation.FSM.LightFsm;
 
@@ -28,17 +23,10 @@ public enum OnOffFsmTrigger
 /// This FSM incorporates both motion and switch events to control the lights.
 /// Switch is expected to have 'on' and 'off' commands.
 /// </summary>
-public class MotionSwitchLightFsm : BaseFsm<OnOffFsmState, OnOffFsmTrigger>
+public class MotionSwitchLightFsm : LightFsm<OnOffFsmState, OnOffFsmTrigger>
 {
-    private readonly IEnumerable<ILightEntityCore>? _lights;
-
-    private const long WaitTime = 30;
-    
     public MotionSwitchLightFsm(ILogger logger, FsmConfig<OnOffFsmState> config) : base(logger, config)
     {
-        StateMachine = new StateMachine<OnOffFsmState, OnOffFsmTrigger>(OnOffFsmState.Off);
-        _lights = config.Lights;
-        InitFSM();
     }
 
     // [System.Text.Json.Serialization.JsonConstructor]
@@ -50,7 +38,7 @@ public class MotionSwitchLightFsm : BaseFsm<OnOffFsmState, OnOffFsmTrigger>
     //     InitFSM();
     // }
 
-    private void InitFSM()
+    protected override void InitFsm()
     {
         StateMachine.OnTransitionCompleted(_ => UpdateState());
 
@@ -72,7 +60,7 @@ public class MotionSwitchLightFsm : BaseFsm<OnOffFsmState, OnOffFsmTrigger>
 
         StateMachine.Configure(OnOffFsmState.OnBySwitch)
             .OnEntry(TurnOnLights)
-            .OnEntry(() => StartTimer(Config.HoldTimeSeconds + Config.HoldTimeMinutes * 60))
+            .OnEntry(() => StartTimer(Config.HoldOnTime))
             .PermitReentry(OnOffFsmTrigger.MotionOn)
             .Ignore(OnOffFsmTrigger.MotionOff)
             .PermitReentry(OnOffFsmTrigger.SwitchOn)
@@ -80,27 +68,13 @@ public class MotionSwitchLightFsm : BaseFsm<OnOffFsmState, OnOffFsmTrigger>
             .Permit(OnOffFsmTrigger.TimeElapsed, OnOffFsmState.WaitingForMotion);
 
         StateMachine.Configure(OnOffFsmState.WaitingForMotion)
-            .OnEntry(() => StartTimer(Config.WaitForOffSeconds + Config.WaitForOffMinutes * 60))
+            .OnEntry(() => StartTimer(Config.WaitForOffTime))
             .Ignore(OnOffFsmTrigger.MotionOff)
             .Permit(OnOffFsmTrigger.MotionOn, OnOffFsmState.OnBySwitch)
             .Permit(OnOffFsmTrigger.SwitchOn, OnOffFsmState.OnBySwitch)
             .Permit(OnOffFsmTrigger.SwitchOff, OnOffFsmState.Off)
             .Permit(OnOffFsmTrigger.TimeElapsed, OnOffFsmState.Off);
         Logger.LogInformation("FSM initialized in state {State}", State);
-    }
-
-    private void TurnOnLights()
-    {
-        Logger.LogInformation("Turning on lights");
-        _lights?.TurnOn();
-        Timer?.Dispose();
-    }
-
-    private void TurnOffLights()
-    {
-        Logger.LogInformation("Turning off lights");
-        _lights?.TurnOff();
-        Timer?.Dispose();
     }
 
     public void SwitchOn()
@@ -148,26 +122,6 @@ public class MotionSwitchLightFsm : BaseFsm<OnOffFsmState, OnOffFsmTrigger>
         {
             Logger.LogInformation("Motion off");
             StateMachine.Fire(OnOffFsmTrigger.MotionOff);
-        }
-        catch (InvalidOperationException e)
-        {
-            Logger.LogInformation(e.Message);
-        }
-    }
-    private void StartTimer(long waitTime = WaitTime)
-    {
-        Logger.LogInformation("Starting timer for {WaitTime} seconds", waitTime);
-        Timer?.Dispose();
-        Timer = Observable.Timer(TimeSpan.FromSeconds(waitTime))
-            .Subscribe(_ => TimeElapsed());
-    }
-    
-    public void TimeElapsed()
-    {
-        try
-        {
-            Logger.LogInformation("Time elapsed");
-            StateMachine.Fire(OnOffFsmTrigger.TimeElapsed);
         }
         catch (InvalidOperationException e)
         {

@@ -6,11 +6,14 @@ public record FsmConfig<TFsmState> where TFsmState : Enum
 {
     private const string DefaultStartTime = "19:00:00";
     private const string DefaultStopTime = "06:00:00";
-    public long HoldTimeSeconds { get; init; } = 360;
-    public long HoldTimeMinutes { get; init; } = 0;
+    public long HoldOnTimeSeconds { get; init; } = 360;
+    public long HoldOnTimeMinutes { get; init; } = 0;
+    public TimeSpan HoldOnTime => TimeSpan.FromSeconds(HoldOnTimeSeconds) + TimeSpan.FromMinutes(HoldOnTimeMinutes);
     public long WaitForOffSeconds { get; init; } = 180;
     public long WaitForOffMinutes { get; init; } = 0;
-    public TFsmState InitialState { get; init; }
+    public TimeSpan WaitForOffTime => TimeSpan.FromSeconds(WaitForOffSeconds) + TimeSpan.FromMinutes(WaitForOffMinutes);
+
+    public TFsmState? InitialState { get; init; }
 
     /// <summary> Add custom behaviour during the night </summary>
     public bool NightMode { get; init; } = false;
