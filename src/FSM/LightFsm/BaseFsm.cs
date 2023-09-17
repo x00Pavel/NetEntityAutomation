@@ -1,5 +1,6 @@
 using System.Reactive.Linq;
 using Microsoft.Extensions.Logging;
+using NetEntityAutomation.Automations.AutomationConfig;
 using Newtonsoft.Json;
 using Stateless;
 
@@ -9,14 +10,15 @@ public abstract class BaseFsm<TState, TTRigger>
     where TState : Enum where TTRigger : Enum
 {
     protected readonly ILogger Logger;
-    protected readonly FsmConfig<TState> Config;
+    protected readonly IFsmConfig<TState> Config;
     protected IDisposable? Timer;
-    public string? StoragePath { get; init; }
+    public required string StoragePath { get; init; }
+    
     public TState State => StateMachine.State;
-    protected StateMachine<TState, TTRigger> StateMachine;
+    protected readonly StateMachine<TState, TTRigger> StateMachine;
     public required TTRigger TimerTrigger { get; init; }
 
-    protected BaseFsm(ILogger logger, FsmConfig<TState> config)
+    protected BaseFsm(ILogger logger, IFsmConfig<TState> config)
     {
         Logger = logger;
         Config = config;

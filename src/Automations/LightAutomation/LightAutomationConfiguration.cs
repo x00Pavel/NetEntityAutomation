@@ -1,13 +1,14 @@
 using NetDaemon.HassModel.Entities;
+using NetEntityAutomation.Automations.AutomationConfig;
 using NetEntityAutomation.FSM.LightFsm;
 
 namespace NetEntityAutomation.Automations.LightAutomation;
 
-public record LightAutomationConfiguration<TFsmState>(string Name, IBinarySensorEntityCore Sensor, string SwitchId,
-    FsmConfig<TFsmState> FsmConfig) where TFsmState : Enum
+public record LightAutomationConfiguration<TFsmState>: IAutomationConfig<TFsmState> where TFsmState : Enum
 {
-    public string? Name { get; init; } = Name;
-    public IBinarySensorEntityCore MotionSensors { get; init; } = Sensor;
-    public string Switch { get; init; } = SwitchId;
-    public FsmConfig<TFsmState> FsmConfig { get; set; } = FsmConfig;
+    public string Name { get; set; }
+    public IBinarySensorEntityCore MotionSensors { get; set; }
+    public string? SwitchId { get; set;  }
+    public IFsmConfig<TFsmState> FsmConfig { get; set; }
+    
 }

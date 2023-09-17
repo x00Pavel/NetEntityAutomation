@@ -1,19 +1,21 @@
 using NetDaemon.HassModel.Entities;
+using NetEntityAutomation.Automations.AutomationConfig;
 
 namespace NetEntityAutomation.FSM.LightFsm;
 
-public record FsmConfig<TFsmState> where TFsmState : Enum
+public class FsmConfig<TFsmState>: IFsmConfig<TFsmState> where TFsmState : Enum
 {
     private const string DefaultStartTime = "19:00:00";
     private const string DefaultStopTime = "06:00:00";
     public long HoldOnTimeSeconds { get; init; } = 360;
     public long HoldOnTimeMinutes { get; init; } = 0;
     public TimeSpan HoldOnTime => TimeSpan.FromSeconds(HoldOnTimeSeconds) + TimeSpan.FromMinutes(HoldOnTimeMinutes);
+
     public long WaitForOffSeconds { get; init; } = 180;
     public long WaitForOffMinutes { get; init; } = 0;
     public TimeSpan WaitForOffTime => TimeSpan.FromSeconds(WaitForOffSeconds) + TimeSpan.FromMinutes(WaitForOffMinutes);
 
-    public TFsmState? InitialState { get; init; }
+    public TFsmState InitialState { get; init; }
 
     /// <summary> Add custom behaviour during the night </summary>
     public bool NightMode { get; init; } = false;
@@ -26,7 +28,7 @@ public record FsmConfig<TFsmState> where TFsmState : Enum
     /// <summary> Function that dynamically returns the stop time </summary>
     public Func<TimeSpan> StopAtTimeFunc { get; set; } = () => DateTime.Parse(DefaultStopTime).TimeOfDay;
 
-    internal bool IsWorkingHours
+    public bool IsWorkingHours
     {
         get
         {

@@ -3,6 +3,7 @@ using Events;
 using Microsoft.Extensions.Logging;
 using NetDaemon.HassModel;
 using NetDaemon.HassModel.Entities;
+using NetEntityAutomation.Automations.AutomationConfig;
 using NetEntityAutomation.FSM.LightFsm;
 
 namespace NetEntityAutomation.Automations.LightAutomation;
@@ -14,7 +15,7 @@ public class OnOffLightAutomation: LightAutomation<OnOffFsmState>
 {   
     private readonly MotionSwitchLightFsm _fsm;
 
-    public OnOffLightAutomation(IHaContext ha, LightAutomationConfiguration<OnOffFsmState> config, ILogger logger): base(logger, config, ha)
+    public OnOffLightAutomation(IHaContext ha, IAutomationConfig<OnOffFsmState> config, ILogger logger): base(logger, config, ha)
     {
         _fsm = new MotionSwitchLightFsm(logger, Config.FsmConfig)
         {
