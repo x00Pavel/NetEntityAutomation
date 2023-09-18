@@ -36,4 +36,9 @@ public class FsmConfig<TFsmState>: IFsmConfig<TFsmState> where TFsmState : Enum
             return now >= StartAtTimeFunc() || now <= StopAtTimeFunc();
         }
     }
+    
+    /// <summary> Percent of brightness in night mode </summary>
+    public long? NightModeBrightness { get; set; } = 40;
+    /// <summary> Transition in night mode </summary>
+    public long? Transition { get; set; } = 2;
 }

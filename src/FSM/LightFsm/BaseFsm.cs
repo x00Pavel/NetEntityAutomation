@@ -22,6 +22,7 @@ public abstract class BaseFsm<TState, TTRigger>
     {
         Logger = logger;
         Config = config;
+        logger.LogInformation("Night mode enabled: {Enabled}", config.NightMode);
         logger.LogDebug("FSM configuration: {Config}", Config);
         StateMachine = new StateMachine<TState, TTRigger>(Config.InitialState);
         InitFsm();

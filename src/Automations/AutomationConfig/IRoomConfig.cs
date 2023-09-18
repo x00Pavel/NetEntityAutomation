@@ -26,11 +26,12 @@ public interface IFsmConfig<TFsmState> where TFsmState : Enum
     public Func<TimeSpan> StopAtTimeFunc { get; }
 
     public bool IsWorkingHours { get; }
+    long? NightModeBrightness { get; set; }
+    long? Transition { get; set; }
 }
 
 public interface IAutomationConfig<TFsmState> where TFsmState : Enum
 {
-    // public IFsmConfig FsmConfig { get; }
     public string Name { get; }
     public IBinarySensorEntityCore MotionSensors { get; }
     public string? SwitchId { get; }
