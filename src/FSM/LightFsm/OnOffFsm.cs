@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
+using NetEntityAutomation.Automations.AutomationConfig;
 
 namespace NetEntityAutomation.FSM.LightFsm;
 
@@ -25,7 +26,7 @@ public enum OnOffFsmTrigger
 /// </summary>
 public class MotionSwitchLightFsm : LightFsm<OnOffFsmState, OnOffFsmTrigger>
 {
-    public MotionSwitchLightFsm(ILogger logger, FsmConfig<OnOffFsmState> config) : base(logger, config)
+    public MotionSwitchLightFsm(ILogger logger, IFsmConfig<OnOffFsmState> config) : base(logger, config)
     {
     }
 
@@ -37,7 +38,7 @@ public class MotionSwitchLightFsm : LightFsm<OnOffFsmState, OnOffFsmTrigger>
     //     StateMachine = new StateMachine<FsmState, FsmTrigger>(fsmState);
     //     InitFSM();
     // }
-
+    
     protected override void InitFsm()
     {
         StateMachine.OnTransitionCompleted(_ => UpdateState());

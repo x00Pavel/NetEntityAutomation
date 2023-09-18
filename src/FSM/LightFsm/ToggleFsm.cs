@@ -1,4 +1,5 @@
 using Microsoft.Extensions.Logging;
+using NetEntityAutomation.Automations.AutomationConfig;
 
 namespace NetEntityAutomation.FSM.LightFsm;
 
@@ -19,10 +20,10 @@ public enum ToggleFsmTrigger
 
 public class ToggleFsm : LightFsm<ToggleFsmState, ToggleFsmTrigger>
 {
-    public ToggleFsm(ILogger logger, FsmConfig<ToggleFsmState> config) : base(logger, config)
+    public ToggleFsm(ILogger logger, IFsmConfig<ToggleFsmState> config) : base(logger, config)
     {
     }
-
+    
     protected override void InitFsm()
     {
         StateMachine.OnTransitionCompleted(_ => UpdateState());

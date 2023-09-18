@@ -18,6 +18,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NetEntityAutomation.FSM.Lig
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NetEntityAutomation.Automations.LightAutomation", "src\Automations\LightAutomation\LightAutomation.csproj", "{B153686C-4183-4932-9054-DF00D7CC99F9}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AutomationConfig", "src\Automations\AutomationConfig\AutomationConfig.csproj", "{B6E7231C-FA5A-4CE3-B240-6E1130A08115}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -43,11 +45,16 @@ Global
 		{B153686C-4183-4932-9054-DF00D7CC99F9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B153686C-4183-4932-9054-DF00D7CC99F9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B153686C-4183-4932-9054-DF00D7CC99F9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B6E7231C-FA5A-4CE3-B240-6E1130A08115}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B6E7231C-FA5A-4CE3-B240-6E1130A08115}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B6E7231C-FA5A-4CE3-B240-6E1130A08115}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B6E7231C-FA5A-4CE3-B240-6E1130A08115}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{B2045A58-5891-4D95-833D-B53D6CCFB5D2} = {2E92CD5F-D91B-4843-8300-CD02FE1A5C3E}
 		{814D8335-4E18-4B53-912C-C4FF1F5234D5} = {2E92CD5F-D91B-4843-8300-CD02FE1A5C3E}
 		{DB5AE529-5B7A-4353-9A3D-90DF9B5DFEEC} = {7C826F0A-2D0A-4BD2-9E5B-A78BC74ACAAE}
 		{B153686C-4183-4932-9054-DF00D7CC99F9} = {86466D73-4622-49C5-951C-D405A54FBD4F}
+		{B6E7231C-FA5A-4CE3-B240-6E1130A08115} = {86466D73-4622-49C5-951C-D405A54FBD4F}
 	EndGlobalSection
 EndGlobal
