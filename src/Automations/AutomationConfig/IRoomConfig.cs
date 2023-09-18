@@ -2,6 +2,17 @@ using NetDaemon.HassModel.Entities;
 
 namespace NetEntityAutomation.Automations.AutomationConfig;
 
+public interface INightModeConfig
+{
+    public bool IsEnabled { get; set; }
+    public List<ILightEntityCore>? Devices { get; init; }
+    long? NightModeBrightness { get; set; }
+    long? Transition { get; set; }
+    public Func<TimeSpan> StopAtTimeFunc { get; }
+    public Func<TimeSpan> StartAtTimeFunc { get; }
+    
+    public bool IsWorkingHours { get; }
+}
 
 public interface IFsmConfig<TFsmState> where TFsmState : Enum
 {
@@ -17,7 +28,7 @@ public interface IFsmConfig<TFsmState> where TFsmState : Enum
     public TFsmState InitialState { get; }
 
     /// <summary> Add custom behaviour during the night </summary>
-    public bool NightMode { get; init; }
+    public INightModeConfig NightMode { get; init; }
 
     /// <summary> Function that dynamically returns the start time </summary>
     public Func<TimeSpan> StartAtTimeFunc { get; }
@@ -26,8 +37,7 @@ public interface IFsmConfig<TFsmState> where TFsmState : Enum
     public Func<TimeSpan> StopAtTimeFunc { get; }
 
     public bool IsWorkingHours { get; }
-    long? NightModeBrightness { get; set; }
-    long? Transition { get; set; }
+    
 }
 
 public interface IAutomationConfig<TFsmState> where TFsmState : Enum
