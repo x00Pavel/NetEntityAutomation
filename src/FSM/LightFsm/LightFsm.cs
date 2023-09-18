@@ -11,9 +11,17 @@ public abstract class LightFsm<TState, TTRigger> : BaseFsm<TState, TTRigger> whe
     }
 
     protected void TurnOnLights()
-    {
+    {   
         Logger.LogInformation("Turning on lights");
-        Config.Lights.TurnOn();
+        if (Config.NightMode is { IsEnabled: true, IsWorkingHours: true })
+        {   
+            Config.NightMode.Devices?.TurnOn(brightnessPct: Config.NightMode.NightModeBrightness, transition: Config.NightMode.Transition);
+        }
+        else
+        {
+            Config.Lights.TurnOn();    
+        }
+        
         Timer?.Dispose();
     }
 
