@@ -1,6 +1,7 @@
 using System.Reactive.Linq;
 using Microsoft.Extensions.Logging;
 using NetDaemon.HassModel;
+using NetEntityAutomation.Automations.AutomationConfig;
 using NetEntityAutomation.FSM.LightFsm;
 
 namespace NetEntityAutomation.Automations.LightAutomation;
@@ -9,7 +10,7 @@ public class ToggleLightAutomation: LightAutomation<ToggleFsmState>
 {   
     private readonly ToggleFsm _fsm;
     
-    public ToggleLightAutomation(IHaContext ha, LightAutomationConfiguration<ToggleFsmState> config, ILogger logger): base(logger, config, ha)
+    public ToggleLightAutomation(IHaContext ha, IAutomationConfig<ToggleFsmState> config, ILogger logger): base(logger, config, ha)
     {   
         _fsm = new ToggleFsm(config: config.FsmConfig, logger: logger)
         {
