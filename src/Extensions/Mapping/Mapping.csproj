@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net7.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <Authors>Pavel Yadlouski</Authors>
+        <PackageProjectUrl>https://github.com/x00Pavel/NetEntityAutomation</PackageProjectUrl>
+        <RepositoryUrl>https://github.com/x00Pavel/NetEntityAutomation</RepositoryUrl>
+        <AssemblyName>NetEntityAutomation.Extesions.Mapping</AssemblyName>
+        <RootNamespace>NetEntityAutomation.Extesions.Mapping</RootNamespace>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\..\FSM\LightFsm\LightFsm.csproj" />
+      <ProjectReference Include="..\LightAutomation\LightAutomation.csproj" />
+    </ItemGroup>
+
+</Project>

@@ -22,7 +22,7 @@ public abstract class BaseFsm<TState, TTRigger>
     {
         Logger = logger;
         Config = config;
-        logger.LogInformation("Night mode enabled: {Enabled}", config.NightMode);
+        logger.LogDebug("Night mode enabled: {Enabled}", config.NightMode);
         logger.LogDebug("FSM configuration: {Config}", Config);
         StateMachine = new StateMachine<TState, TTRigger>(Config.InitialState);
         InitFsm();
@@ -38,13 +38,13 @@ public abstract class BaseFsm<TState, TTRigger>
 
     protected void UpdateState()
     {
-        Logger.LogInformation("Updating state in storage {State}", State);
+        Logger.LogDebug("Updating state in storage {State}", State);
         File.WriteAllText(StoragePath, ToJson());
     }
 
     private string ToJson()
     {
-        Logger.LogInformation("Serializing to JSON");
+        Logger.LogDebug("Serializing to JSON");
         return JsonConvert.SerializeObject(this);
     }
 
@@ -55,7 +55,7 @@ public abstract class BaseFsm<TState, TTRigger>
 
     protected void StartTimer(TimeSpan waitTime)
     {
-        Logger.LogInformation("Starting timer for {WaitTime} seconds", waitTime.TotalSeconds);
+        Logger.LogDebug("Starting timer for {WaitTime} seconds", waitTime.TotalSeconds);
         Timer?.Dispose();
         Timer = Observable.Timer(waitTime)
             .Subscribe(_ => TimeElapsed());
@@ -65,12 +65,12 @@ public abstract class BaseFsm<TState, TTRigger>
     {
         try
         {
-            Logger.LogInformation("Time elapsed");
+            Logger.LogDebug("Time elapsed");
             StateMachine.Fire(TimerTrigger);
         }
         catch (InvalidOperationException e)
         {
-            Logger.LogInformation(e.Message);
+            Logger.LogError(e.Message);
         }
     }
 

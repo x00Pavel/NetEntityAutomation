@@ -1,9 +1,13 @@
 using Microsoft.Extensions.Logging;
 using NetDaemon.HassModel;
 using NetEntityAutomation.Automations.AutomationConfig;
-using NetEntityAutomation.FSM.LightFsm;
 
 namespace NetEntityAutomation.Automations.LightAutomation;
+
+
+
+// dictionary with maping of FSM state to automation class
+// static Dictionary<string, string> fsmToAutomationMap = new Dictionary<string, string>();
 
 public abstract class BaseAutomation<TFsmState> where TFsmState: struct, Enum
 {

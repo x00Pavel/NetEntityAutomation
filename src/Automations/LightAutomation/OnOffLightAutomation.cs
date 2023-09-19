@@ -1,8 +1,6 @@
 ﻿using System.Reactive.Linq;
-using Events;
 using Microsoft.Extensions.Logging;
 using NetDaemon.HassModel;
-using NetDaemon.HassModel.Entities;
 using NetEntityAutomation.Automations.AutomationConfig;
 using NetEntityAutomation.FSM.LightFsm;
 

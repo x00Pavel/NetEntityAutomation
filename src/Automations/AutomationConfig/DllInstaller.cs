@@ -9,7 +9,7 @@ public static class DiInstaller
     public static IServiceCollection AddRoomAssistant(this IServiceCollection serviceCollection)
     {
         serviceCollection.Scan(selector =>
-            selector.FromCallingAssembly()
+            selector.FromEntryAssembly()
                 .AddClasses(
                     classSelector =>
                         classSelector.AssignableTo(typeof(IRoom)))
