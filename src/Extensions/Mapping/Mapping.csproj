@@ -8,10 +8,11 @@
         <PackageProjectUrl>https://github.com/x00Pavel/NetEntityAutomation</PackageProjectUrl>
         <RepositoryUrl>https://github.com/x00Pavel/NetEntityAutomation</RepositoryUrl>
         <AssemblyName>NetEntityAutomation.Extesions.Mapping</AssemblyName>
-        <RootNamespace>NetEntityAutomation.Extesions.Mapping</RootNamespace>
+        <RootNamespace>NetEntityAutomation.Extensions.Mapping</RootNamespace>
     </PropertyGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\..\Automations\LightAutomation\LightAutomation.csproj" />
       <ProjectReference Include="..\..\FSM\LightFsm\LightFsm.csproj" />
       <ProjectReference Include="..\LightAutomation\LightAutomation.csproj" />
     </ItemGroup>

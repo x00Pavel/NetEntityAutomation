@@ -1,7 +1,7 @@
 using NetEntityAutomation.Automations.LightAutomation;
 using NetEntityAutomation.FSM.LightFsm;
 
-namespace NetEntityAutomation.Extesions.Mapping;
+namespace NetEntityAutomation.Extensions.Mapping;
 
 public static class Mapping
 {

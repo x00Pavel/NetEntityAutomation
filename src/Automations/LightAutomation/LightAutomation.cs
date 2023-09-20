@@ -3,7 +3,7 @@ using Microsoft.Extensions.Logging;
 using NetDaemon.HassModel;
 using NetDaemon.HassModel.Entities;
 using NetEntityAutomation.Automations.AutomationConfig;
-using NetEntityAutomation.Extesions.Events;
+using NetEntityAutomation.Extensions.Events;
 
 namespace NetEntityAutomation.Automations.LightAutomation;
 
