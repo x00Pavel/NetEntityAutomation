@@ -14,7 +14,6 @@
     <ItemGroup>
       <ProjectReference Include="..\..\Automations\LightAutomation\LightAutomation.csproj" />
       <ProjectReference Include="..\..\FSM\LightFsm\LightFsm.csproj" />
-      <ProjectReference Include="..\LightAutomation\LightAutomation.csproj" />
     </ItemGroup>
 
 </Project>
