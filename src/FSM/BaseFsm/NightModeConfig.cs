@@ -10,7 +10,7 @@ public record NightModeConfig: INightModeConfig
     public long? NightModeBrightness { get; set; } = 40;
     public long? Transition { get; set; } = 2;
     public Func<TimeSpan> StopAtTimeFunc { get; init; } = () => DateTime.Parse("05:00:00").TimeOfDay;
-    public Func<TimeSpan> StartAtTimeFunc { get; init; } = () => DateTime.Parse("23:30:00").TimeOfDay;
+    public Func<TimeSpan> StartAtTimeFunc { get; init; } = () => DateTime.Parse("23:00:00").TimeOfDay;
     
     public bool IsWorkingHours { get
     {

@@ -20,6 +20,7 @@
     <ItemGroup>
         <ProjectReference Include="..\..\Automations\AutomationConfig\AutomationConfig.csproj" />
         <ProjectReference Include="..\..\Extensions\LightExtensionMethods\LightExtensionMethods.csproj"/>
+        <ProjectReference Include="..\BaseFsm\BaseFsm.csproj" />
     </ItemGroup>
 
 </Project>

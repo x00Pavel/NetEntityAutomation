@@ -41,6 +41,6 @@ public static class LightExtensionMethods
     
     public static void TurnOn(this IEnumerable<ILightEntityCore> target, long? transition = null, long? brightnessPct = null)
     {
-        target.CallService("toggle", new LightParameters { Transition = transition, BrightnessPct = brightnessPct});
+        target.CallService("turn_on", new LightParameters { Transition = transition, BrightnessPct = brightnessPct});
     }
 }

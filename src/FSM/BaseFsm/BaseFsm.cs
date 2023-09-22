@@ -47,11 +47,12 @@ public abstract class BaseFsm<TState, TTRigger>
         Logger.LogDebug("Serializing to JSON");
         return JsonConvert.SerializeObject(this);
     }
-
-    public static MotionSwitchLightFsm? FromJson(string jsonString)
-    {
-        return JsonConvert.DeserializeObject<MotionSwitchLightFsm>(jsonString);
-    }
+    
+    // FIXME: This is not working because of circular dependency
+    // public static BaseFsm? FromJson(string jsonString)
+    // {
+    //     return JsonConvert.DeserializeObject<MotionSwitchLightFsm>(jsonString);
+    // }
 
     protected void StartTimer(TimeSpan waitTime)
     {
