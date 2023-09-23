@@ -20,9 +20,4 @@ public abstract class LightAutomation<TFsmState>: BaseAutomation<TFsmState> wher
         HaContext.Events.Filter<ZhaEventData>("zha_event")
             .Where(e => e.Data?.DeviceIeee == Config.SwitchId)
             .Select(e => e.Data!);
-
-    // protected void LightChangedFromHa()
-    // {
-    //     Config.FsmConfig.Lights.
-    // }
 }
