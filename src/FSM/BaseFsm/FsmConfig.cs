@@ -36,4 +36,7 @@ public class FsmConfig<TFsmState>: IFsmConfig<TFsmState> where TFsmState : Enum
             return now >= StartAtTimeFunc() || now <= StopAtTimeFunc();
         }
     }
+    
+    public IEnumerable<Func<bool>> AdditionalConditions { get; init; } = new List<Func<bool>>{ () => true };
+    
 }

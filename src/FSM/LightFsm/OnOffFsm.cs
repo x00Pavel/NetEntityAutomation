@@ -41,6 +41,7 @@ public class MotionSwitchLightFsm : LightFsm<OnOffFsmState, OnOffFsmTrigger>
     
     protected override void InitFsm()
     {
+        
         StateMachine.OnTransitionCompleted(_ => UpdateState());
 
         StateMachine.Configure(OnOffFsmState.Off)
@@ -48,15 +49,16 @@ public class MotionSwitchLightFsm : LightFsm<OnOffFsmState, OnOffFsmTrigger>
             .PermitReentry(OnOffFsmTrigger.SwitchOff)
             .Ignore(OnOffFsmTrigger.MotionOff)
             .Ignore(OnOffFsmTrigger.TimeElapsed)
-            .PermitIf(OnOffFsmTrigger.MotionOn, OnOffFsmState.OnByMotion, WorkingHours)
-            .PermitIf(OnOffFsmTrigger.SwitchOn, OnOffFsmState.OnBySwitch);
+            // FIXME: delegate same condition with user-defined guards
+            .PermitIf(OnOffFsmTrigger.MotionOn, OnOffFsmState.OnByMotion, () => WorkingHours() && UserDefinedGuard() ) 
+            .PermitIf(OnOffFsmTrigger.SwitchOn, OnOffFsmState.OnBySwitch, UserDefinedGuard);
 
         StateMachine.Configure(OnOffFsmState.OnByMotion)
             .OnEntry(TurnOnLights)
             .PermitReentry(OnOffFsmTrigger.MotionOn)
             .Ignore(OnOffFsmTrigger.TimeElapsed)
             .Permit(OnOffFsmTrigger.SwitchOn, OnOffFsmState.OnBySwitch)
-            .PermitIf(OnOffFsmTrigger.MotionOff, OnOffFsmState.Off, WorkingHours)
+            .Permit(OnOffFsmTrigger.MotionOff, OnOffFsmState.Off)
             .Permit(OnOffFsmTrigger.SwitchOff, OnOffFsmState.Off);
 
         StateMachine.Configure(OnOffFsmState.OnBySwitch)
@@ -65,7 +67,7 @@ public class MotionSwitchLightFsm : LightFsm<OnOffFsmState, OnOffFsmTrigger>
             .PermitReentry(OnOffFsmTrigger.MotionOn)
             .Ignore(OnOffFsmTrigger.MotionOff)
             .PermitReentry(OnOffFsmTrigger.SwitchOn)
-            .Permit(OnOffFsmTrigger.SwitchOff, OnOffFsmState.Off)
+            .Permit(OnOffFsmTrigger.SwitchOff, OnOffFsmState.Off) // Allow this transition to ensure that the light is turned on after timeout
             .Permit(OnOffFsmTrigger.TimeElapsed, OnOffFsmState.WaitingForMotion);
 
         StateMachine.Configure(OnOffFsmState.WaitingForMotion)

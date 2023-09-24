@@ -26,4 +26,6 @@ public interface IFsmConfig<TFsmState> where TFsmState : Enum
 
     public bool IsWorkingHours { get; }
     
+    public IEnumerable<Func<bool>> AdditionalConditions { get; init; }
+    
 }

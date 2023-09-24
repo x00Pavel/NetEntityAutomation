@@ -74,6 +74,14 @@ public abstract class BaseFsm<TState, TTRigger>
             Logger.LogError(e.Message);
         }
     }
+    
+    protected bool UserDefinedGuard()
+    {
+        return Config.AdditionalConditions
+            .Select(func => func())
+            .ToList()
+            .All(e => e);
+    }
 
     protected abstract void InitFsm();
 }
