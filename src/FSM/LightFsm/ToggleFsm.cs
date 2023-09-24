@@ -31,7 +31,7 @@ public class ToggleFsm : LightFsm<ToggleFsmState, ToggleFsmTrigger>
             .OnEntry(TurnOffLights)
             .Ignore(ToggleFsmTrigger.TimeElapsed)
             .PermitReentry(ToggleFsmTrigger.MotionOff)
-            .PermitIf(ToggleFsmTrigger.MotionOn, ToggleFsmState.On, WorkingHours)
+            .PermitIf(ToggleFsmTrigger.MotionOn, ToggleFsmState.On, () => WorkingHours() && UserDefinedGuard())
             .Permit(ToggleFsmTrigger.Toggle, ToggleFsmState.On);
 
         StateMachine.Configure(ToggleFsmState.On)
