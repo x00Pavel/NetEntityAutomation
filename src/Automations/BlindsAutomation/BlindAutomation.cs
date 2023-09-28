@@ -1,27 +1,24 @@
+using Microsoft.Extensions.Logging;
+using NetDaemon.HassModel;
 using NetDaemon.HassModel.Entities;
+using NetEntityAutomation.Extensions.CoverEntity;
+using NetEntityAutomation.Extensions.SunEntity;
+namespace NetEntityAutomation.Automations.BlindsAutomation;
 
-namespace BlindsAutomation;
-
-public class BlindAutomation
+public class BlindAutomation: BaseAutomation
 {
     public ICoverEntityCore Blind { get; set; }
-    public string? SwitchId { get; set; }
-
-    public IEnumerable<IBinarySensorEntityCore?> MotionSensor { get; set; }
-
-    
-    public BlindAutomation(ICoverEntityCore blind, IEnumerable<IBinarySensorEntityCore?> motionSensor, string? switchId = null)
+    public SunEntity Sun { get; }
+    private new IBlindAutomationConfig Config => (IBlindAutomationConfig) base.Config;
+        public BlindAutomation(IHaContext ha, IBlindAutomationConfig config, ILogger logger) : base(logger, config, ha )
     {
-        Blind = blind;
-        MotionSensor = motionSensor;
-        SwitchId = switchId;
+        Blind = Config.Blind;
+        Sun = new SunEntity(ha, "sun.sun");
+        Sun.SunAboveHorizon.Subscribe(_ => Blind.OpenCover());
+        Sun.SunBelowHorizon.Subscribe(_ => Blind.CloseCover());
     }
-    
-    public BlindAutomation(ICoverEntityCore blind, IBinarySensorEntityCore? motionSensor = null, string? switchId = null): 
-        this(blind, new [] {motionSensor}, switchId) { }
 
-    
-
-    
-    
+    protected override void InitFsmTransitions()
+    {
+    }
 }

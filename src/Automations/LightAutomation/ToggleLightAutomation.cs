@@ -10,13 +10,12 @@ public class ToggleLightAutomation: LightAutomation<ToggleFsmState>
 {   
     private readonly ToggleFsm _fsm;
     
-    public ToggleLightAutomation(IHaContext ha, IAutomationConfig<ToggleFsmState> config, ILogger logger): base(logger, config, ha)
+    public ToggleLightAutomation(IHaContext ha, ILightAutomationConfig<ToggleFsmState> config, ILogger logger): base(logger, config, ha)
     {   
         _fsm = new ToggleFsm(config: config.FsmConfig, logger: logger)
         {
             TimerTrigger = ToggleFsmTrigger.TimeElapsed,
             StoragePath = $"storage/{config.Name}_fsm.json"
-            
         };
         InitFsmTransitions();
         logger.LogInformation("{AutomationName} initialised", nameof(ToggleLightAutomation));

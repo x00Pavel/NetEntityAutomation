@@ -7,9 +7,11 @@ using NetEntityAutomation.Extensions.Events;
 
 namespace NetEntityAutomation.Automations.LightAutomation;
 
-public abstract class LightAutomation<TFsmState>: BaseAutomation<TFsmState> where TFsmState : struct, Enum
+public abstract class LightAutomation<TFsmState>: BaseAutomation where TFsmState : Enum
 {
-    protected LightAutomation(ILogger logger, IAutomationConfig<TFsmState> config, IHaContext haContext) : base(logger, config, haContext)
+    protected new ILightAutomationConfig<TFsmState> Config { get; init; }
+
+    protected LightAutomation(ILogger logger, ILightAutomationConfig<TFsmState> config, IHaContext haContext) : base(logger, config, haContext)
     {
     }
 

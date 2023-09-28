@@ -16,6 +16,7 @@
         <ProjectReference Include="..\..\FSM\LightFsm\LightFsm.csproj"/>
         <ProjectReference Include="..\..\Extensions\LightExtensionMethods\LightExtensionMethods.csproj"/>
         <ProjectReference Include="..\AutomationConfig\AutomationConfig.csproj" />
+        <ProjectReference Include="..\BaseAutomation\BaseAutomation.csproj" />
     </ItemGroup>
 
 </Project>

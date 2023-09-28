@@ -13,7 +13,7 @@ public class OnOffLightAutomation: LightAutomation<OnOffFsmState>
 {   
     private readonly MotionSwitchLightFsm _fsm;
 
-    public OnOffLightAutomation(IHaContext ha, IAutomationConfig<OnOffFsmState> config, ILogger logger): base(logger, config, ha)
+    public OnOffLightAutomation(IHaContext ha, ILightAutomationConfig<OnOffFsmState> config, ILogger logger): base(logger, config, ha)
     {
         _fsm = new MotionSwitchLightFsm(logger, Config.FsmConfig)
         {
@@ -21,7 +21,7 @@ public class OnOffLightAutomation: LightAutomation<OnOffFsmState>
             StoragePath = $"storage/{config.Name}_fsm.json"
         };
         InitFsmTransitions();
-        logger.LogInformation("LightAutomation initialised");
+        logger.LogInformation("{AutomationName} initialised", nameof(OnOffLightAutomation));
     }
 
     protected sealed override void InitFsmTransitions()

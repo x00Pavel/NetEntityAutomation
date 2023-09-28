@@ -27,3 +27,9 @@ public interface IFsmConfig<TFsmState> where TFsmState : Enum
     public bool IsWorkingHours { get; }
     
 }
+
+public interface IEntityAutomationConfig
+{
+    public IEnumerable<IEntityCore> ControlledEntities { get; }
+    public IEnumerable<IBinarySensorEntityCore> Sensors { get; }
+}
