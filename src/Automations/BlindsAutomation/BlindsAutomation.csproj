@@ -1,0 +1,27 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net7.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <RootNamespace>NetEntityAutomation.Automations.BlindsAutomation</RootNamespace>
+        <Authors>Pavel Yadlouski</Authors>
+        <PackageProjectUrl>https://github.com/x00Pavel/NetEntityAutomation</PackageProjectUrl>
+        <RepositoryUrl>https://github.com/x00Pavel/NetEntityAutomation</RepositoryUrl>
+        <AssemblyName>NetEntityAutomation.Automations.BlindsAutomation</AssemblyName>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="JoySoftware.NetDaemon.HassModel" Version="23.38.0" />
+        <PackageReference Include="System.Reactive" Version="6.0.0" /> 
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\..\Extensions\CoverEntity\CoverEntity.csproj" />
+        <ProjectReference Include="..\..\Extensions\SunEntity\SunEntity.csproj" />
+        <ProjectReference Include="..\BaseAutomation\BaseAutomation.csproj" />
+    </ItemGroup>
+
+
+</Project>
+    
