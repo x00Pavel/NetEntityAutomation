@@ -1,7 +1,6 @@
 ﻿using System.Reactive.Linq;
 using Microsoft.Extensions.Logging;
 using NetDaemon.HassModel;
-using NetEntityAutomation.Automations.AutomationConfig;
 using NetEntityAutomation.FSM.LightFsm;
 
 namespace NetEntityAutomation.Automations.LightAutomation;
@@ -11,20 +10,19 @@ namespace NetEntityAutomation.Automations.LightAutomation;
 /// </summary>
 public class OnOffLightAutomation: LightAutomation<OnOffFsmState>
 {   
-    private readonly MotionSwitchLightFsm _fsm;
+    private readonly OnOffLightFsm _fsm;
 
     public OnOffLightAutomation(IHaContext ha, ILightAutomationConfig<OnOffFsmState> config, ILogger logger): base(logger, config, ha)
     {
-        _fsm = new MotionSwitchLightFsm(logger, Config.FsmConfig)
+        _fsm = new OnOffLightFsm(logger, Config.FsmConfig)
         {
             TimerTrigger = OnOffFsmTrigger.TimeElapsed,
             StoragePath = $"storage/{config.Name}_fsm.json"
         };
-        InitFsmTransitions();
         logger.LogInformation("{AutomationName} initialised", nameof(OnOffLightAutomation));
     }
 
-    protected sealed override void InitFsmTransitions()
+    protected override void InitFsmTransitions()
     {
         Logger.LogInformation("Initialising FSM for {RoomName}", Config.Name);
         MotionSensorEvent.Where(e => e.New?.State == "on").Subscribe(_ => _fsm.MotionOn());

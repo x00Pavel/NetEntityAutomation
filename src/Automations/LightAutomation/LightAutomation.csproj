@@ -17,6 +17,7 @@
         <ProjectReference Include="..\..\Extensions\LightExtensionMethods\LightExtensionMethods.csproj"/>
         <ProjectReference Include="..\AutomationConfig\AutomationConfig.csproj" />
         <ProjectReference Include="..\BaseAutomation\BaseAutomation.csproj" />
+        <ProjectReference Include="..\StatefulAutomation\StatefulAutomation.csproj" />
     </ItemGroup>
 
 </Project>

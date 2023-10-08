@@ -24,9 +24,9 @@ public enum OnOffFsmTrigger
 /// This FSM incorporates both motion and switch events to control the lights.
 /// Switch is expected to have 'on' and 'off' commands.
 /// </summary>
-public class MotionSwitchLightFsm : LightFsm<OnOffFsmState, OnOffFsmTrigger>
+public class OnOffLightFsm : LightFsm<OnOffFsmState, OnOffFsmTrigger>
 {
-    public MotionSwitchLightFsm(ILogger logger, IFsmConfig<OnOffFsmState> config) : base(logger, config)
+    public OnOffLightFsm(ILogger logger, IFsmConfig<OnOffFsmState> config) : base(logger, config)
     {
     }
 

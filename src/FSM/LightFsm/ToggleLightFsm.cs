@@ -18,9 +18,9 @@ public enum ToggleFsmTrigger
     TimeElapsed
 }
 
-public class ToggleFsm : LightFsm<ToggleFsmState, ToggleFsmTrigger>
+public class ToggleLightFsm : LightFsm<ToggleFsmState, ToggleFsmTrigger>
 {
-    public ToggleFsm(ILogger logger, IFsmConfig<ToggleFsmState> config) : base(logger, config)
+    public ToggleLightFsm(ILogger logger, IFsmConfig<ToggleFsmState> config) : base(logger, config)
     {
     }
     

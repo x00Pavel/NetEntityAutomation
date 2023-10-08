@@ -4,17 +4,17 @@ using NetEntityAutomation.Automations.AutomationConfig;
 
 namespace NetEntityAutomation.Automations;
 
-public abstract class BaseAutomation
+public abstract class BaseAutomation<TConfig> where TConfig : IAutomationConfig
 {
     protected ILogger Logger;
 
-    protected IAutomationConfig Config { get; init; }
+    protected TConfig Config { get; init; }
 
     protected IHaContext HaContext { get; init; }
 
     protected BaseAutomation(
         ILogger logger,
-        IAutomationConfig config,
+        TConfig config,
         IHaContext haContext
         )
     {
@@ -22,6 +22,20 @@ public abstract class BaseAutomation
         Config = config;
         HaContext = haContext;
     }
+}
 
-    protected abstract void InitFsmTransitions();
+
+
+public abstract class BaseAutomation: BaseAutomation<IAutomationConfig>
+{
+
+
+    protected BaseAutomation(
+        ILogger logger,
+        IAutomationConfig config,
+        IHaContext haContext
+        ) : base(logger, config, haContext)
+    {
+        
+    }
 }
