@@ -36,4 +36,6 @@ public class FsmConfig<TFsmState>: IFsmConfig<TFsmState> where TFsmState : Enum
             return now >= StartAtTimeFunc() || now <= StopAtTimeFunc();
         }
     }
+
+    public double Transition { get; set; } = 2.5;
 }

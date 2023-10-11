@@ -19,7 +19,7 @@ public abstract class LightFsm<TState, TTRigger> : BaseFsm<TState, TTRigger> whe
         }
         else
         {
-            Config.Lights.TurnOn(brightnessPct: 100);    
+            Config.Lights.TurnOn(brightnessPct: 100, transition: Config.Transition);    
         }
         
         Timer?.Dispose();
