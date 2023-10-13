@@ -28,6 +28,12 @@ public class FsmConfig<TFsmState>: IFsmConfig<TFsmState> where TFsmState : Enum
     /// <summary> Function that dynamically returns the stop time </summary>
     public Func<TimeSpan> StopAtTimeFunc { get; set; } = () => DateTime.Parse(DefaultStopTime).TimeOfDay;
 
+    public double Transition { get; set; } = 2.5;
+    public IEnumerable<Func<bool>> SensorConditions { get; init; } = new [] { () => true };
+    public IEnumerable<Func<bool>> SwitchConditions { get; init; } = new [] { () => true };
+    public bool SensorConditionMet => SensorConditions.All(c => c());
+    public bool SwitchConditionMet => SwitchConditions.All(c => c());
+
     public bool IsWorkingHours
     {
         get
@@ -36,6 +42,5 @@ public class FsmConfig<TFsmState>: IFsmConfig<TFsmState> where TFsmState : Enum
             return now >= StartAtTimeFunc() || now <= StopAtTimeFunc();
         }
     }
-
-    public double Transition { get; set; } = 2.5;
+    
 }

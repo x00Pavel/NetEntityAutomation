@@ -26,4 +26,14 @@ public interface IFsmConfig<TFsmState> where TFsmState : Enum
 
     public bool IsWorkingHours { get; }
     public double Transition { get; set; }
+    
+    
+    
+    public IEnumerable<Func<bool>> SensorConditions { get; init; }
+    
+    public IEnumerable<Func<bool>> SwitchConditions { get; init; }
+    
+    public bool SensorConditionMet { get; }
+    
+    public bool SwitchConditionMet { get; }
 }
