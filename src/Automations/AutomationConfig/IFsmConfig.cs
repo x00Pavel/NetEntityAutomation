@@ -25,5 +25,5 @@ public interface IFsmConfig<TFsmState> where TFsmState : Enum
     public Func<TimeSpan> StopAtTimeFunc { get; }
 
     public bool IsWorkingHours { get; }
-    
+    public double Transition { get; set; }
 }
