@@ -37,8 +37,10 @@ public abstract class BaseFsm<TState, TTRigger>
     }
 
     protected bool SensorConditions()
-    {
-        return WorkingHours() && Config.SensorConditionMet;
+    {   
+        var result = WorkingHours() && Config.SensorConditionMet; 
+        Logger.LogDebug("Sensor conditions met: {Conditions}", result);
+        return result;
     }
     
     protected void UpdateState()
