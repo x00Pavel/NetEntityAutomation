@@ -41,6 +41,7 @@ public class MotionSwitchLightFsm : LightFsm<OnOffFsmState, OnOffFsmTrigger>
     
     protected override void InitFsm()
     {
+        // Switch triggers the action without any conditions
         StateMachine.OnTransitionCompleted(_ => UpdateState());
 
         StateMachine.Configure(OnOffFsmState.Off)
@@ -48,8 +49,8 @@ public class MotionSwitchLightFsm : LightFsm<OnOffFsmState, OnOffFsmTrigger>
             .PermitReentry(OnOffFsmTrigger.SwitchOff)
             .Ignore(OnOffFsmTrigger.MotionOff)
             .Ignore(OnOffFsmTrigger.TimeElapsed)
-            .PermitIf(OnOffFsmTrigger.MotionOn, OnOffFsmState.OnByMotion, WorkingHours)
-            .PermitIf(OnOffFsmTrigger.SwitchOn, OnOffFsmState.OnBySwitch);
+            .PermitIf(OnOffFsmTrigger.MotionOn, OnOffFsmState.OnByMotion, SensorConditions)
+            .PermitIf(OnOffFsmTrigger.SwitchOn, OnOffFsmState.OnBySwitch, () => Config.SwitchConditionMet);
 
         StateMachine.Configure(OnOffFsmState.OnByMotion)
             .OnEntry(TurnOnLights)
@@ -71,7 +72,7 @@ public class MotionSwitchLightFsm : LightFsm<OnOffFsmState, OnOffFsmTrigger>
         StateMachine.Configure(OnOffFsmState.WaitingForMotion)
             .OnEntry(() => StartTimer(Config.WaitForOffTime))
             .Ignore(OnOffFsmTrigger.MotionOff)
-            .Permit(OnOffFsmTrigger.MotionOn, OnOffFsmState.OnBySwitch)
+            .PermitIf(OnOffFsmTrigger.MotionOn, OnOffFsmState.OnBySwitch, SensorConditions)
             .Permit(OnOffFsmTrigger.SwitchOn, OnOffFsmState.OnBySwitch)
             .Permit(OnOffFsmTrigger.SwitchOff, OnOffFsmState.Off)
             .Permit(OnOffFsmTrigger.TimeElapsed, OnOffFsmState.Off);

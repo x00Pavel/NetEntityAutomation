@@ -31,11 +31,16 @@ public abstract class BaseFsm<TState, TTRigger>
     protected bool WorkingHours()
     {
         var now = DateTime.Now.TimeOfDay;
-        Logger.LogDebug("Working hors: {Start} - {Stop}", Config.StartAtTimeFunc(), Config.StopAtTimeFunc());
+        Logger.LogDebug("Working hours: {Start} - {Stop}", Config.StartAtTimeFunc(), Config.StopAtTimeFunc());
         Logger.LogDebug("Is working {Now} hours: {IsWorkingHours}", now, Config.IsWorkingHours);
         return Config.IsWorkingHours;
     }
 
+    protected bool SensorConditions()
+    {
+        return WorkingHours() && Config.SensorConditionMet;
+    }
+    
     protected void UpdateState()
     {
         Logger.LogDebug("Updating state in storage {State}", State);
