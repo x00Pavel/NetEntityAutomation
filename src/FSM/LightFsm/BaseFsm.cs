@@ -51,7 +51,6 @@ public abstract class BaseFsm<TState, TTRigger>
 
     private string ToJson()
     {
-        Logger.LogDebug("Serializing to JSON");
         return JsonConvert.SerializeObject(this);
     }
 
@@ -62,7 +61,7 @@ public abstract class BaseFsm<TState, TTRigger>
 
     protected void StartTimer(TimeSpan waitTime)
     {
-        Logger.LogDebug("Starting timer for {WaitTime} seconds", waitTime.TotalSeconds);
+        Logger.LogDebug("Starting timer for {WaitHours}:{WaitMinutes}:{WaitTime}", waitTime.Hours, waitTime.Minutes, waitTime.Seconds);
         Timer?.Dispose();
         Timer = Observable.Timer(waitTime)
             .Subscribe(_ => TimeElapsed());
