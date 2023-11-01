@@ -54,8 +54,9 @@ public class MotionSwitchLightFsm : LightFsm<OnOffFsmState, OnOffFsmTrigger>
 
         StateMachine.Configure(OnOffFsmState.OnByMotion)
             .OnEntry(TurnOnLights)
+            .OnEntry(() => StartTimer(TimeSpan.FromMinutes(5))) // FIXME: move this value to the config
             .PermitReentry(OnOffFsmTrigger.MotionOn)
-            .Ignore(OnOffFsmTrigger.TimeElapsed)
+            .Permit(OnOffFsmTrigger.TimeElapsed, OnOffFsmState.OnBySwitch)
             .Permit(OnOffFsmTrigger.SwitchOn, OnOffFsmState.OnBySwitch)
             .PermitIf(OnOffFsmTrigger.MotionOff, OnOffFsmState.Off, WorkingHours)
             .Permit(OnOffFsmTrigger.SwitchOff, OnOffFsmState.Off);
@@ -67,7 +68,7 @@ public class MotionSwitchLightFsm : LightFsm<OnOffFsmState, OnOffFsmTrigger>
             .Ignore(OnOffFsmTrigger.MotionOff)
             .PermitReentry(OnOffFsmTrigger.SwitchOn)
             .Permit(OnOffFsmTrigger.SwitchOff, OnOffFsmState.Off)
-            .Permit(OnOffFsmTrigger.TimeElapsed, OnOffFsmState.WaitingForMotion);
+            .PermitIf(OnOffFsmTrigger.TimeElapsed, OnOffFsmState.WaitingForMotion, WorkingHours);
 
         StateMachine.Configure(OnOffFsmState.WaitingForMotion)
             .OnEntry(() => StartTimer(Config.WaitForOffTime))
