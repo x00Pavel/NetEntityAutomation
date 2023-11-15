@@ -12,17 +12,18 @@ public abstract class BaseFsm<TState, TTRigger>
     protected readonly ILogger Logger;
     protected readonly IFsmConfig<TState> Config;
     protected IDisposable? Timer;
-    public required string StoragePath { get; init; }
+    public string StoragePath { get; init; }
     
     public TState State => StateMachine.State;
     protected readonly StateMachine<TState, TTRigger> StateMachine;
     public required TTRigger TimerTrigger { get; init; }
     public bool IsEnabled { get; set; } = true;
     
-    protected BaseFsm(ILogger logger, IFsmConfig<TState> config)
+    protected BaseFsm(ILogger logger, IFsmConfig<TState> config, string storagePath)
     {
         Logger = logger;
         Config = config;
+        StoragePath = storagePath;
         logger.LogDebug("Night mode enabled: {Enabled}", config.NightMode);
         logger.LogDebug("FSM configuration: {Config}", Config);
         StateMachine = new StateMachine<TState, TTRigger>(Config.InitialState);
@@ -47,7 +48,6 @@ public abstract class BaseFsm<TState, TTRigger>
     protected void UpdateState()
     {
         Logger.LogDebug("Updating state in storage {State}", State);
-        Logger.LogDebug("State of FSM is {Enabled}", IsEnabled);
         File.WriteAllText(StoragePath, ToJson());
     }
 

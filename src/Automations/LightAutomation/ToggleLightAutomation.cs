@@ -12,10 +12,9 @@ public class ToggleLightAutomation: LightAutomation<ToggleFsmState>
     
     public ToggleLightAutomation(IHaContext ha, IAutomationConfig<ToggleFsmState> config, ILogger logger): base(logger, config, ha)
     {   
-        _fsm = new ToggleFsm(config: config.FsmConfig, logger: logger)
+        _fsm = new ToggleFsm(logger: logger, config.FsmConfig, $"storage/{config.Name}_fsm.json")
         {
             TimerTrigger = ToggleFsmTrigger.TimeElapsed,
-            StoragePath = $"storage/{config.Name}_fsm.json"
             
         };
         InitFsmTransitions();
