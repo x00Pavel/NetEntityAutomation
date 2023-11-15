@@ -26,7 +26,7 @@ public enum OnOffFsmTrigger
 /// </summary>
 public class MotionSwitchLightFsm : LightFsm<OnOffFsmState, OnOffFsmTrigger>
 {
-    public MotionSwitchLightFsm(ILogger logger, IFsmConfig<OnOffFsmState> config) : base(logger, config)
+    public MotionSwitchLightFsm(ILogger logger, IFsmConfig<OnOffFsmState> config, string storagePath) : base(logger, config, storagePath)
     {
     }
 

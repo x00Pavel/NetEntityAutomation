@@ -9,6 +9,11 @@ namespace NetEntityAutomation.FSM.LightFsm;
 public abstract class BaseFsm<TState, TTRigger>
     where TState : Enum where TTRigger : Enum
 {
+    public class JsonStorageSchema
+    {
+        public TState State { get; set; }
+    }
+    
     protected readonly ILogger Logger;
     protected readonly IFsmConfig<TState> Config;
     protected IDisposable? Timer;
@@ -28,8 +33,35 @@ public abstract class BaseFsm<TState, TTRigger>
         logger.LogDebug("FSM configuration: {Config}", Config);
         StateMachine = new StateMachine<TState, TTRigger>(Config.InitialState);
         InitFsm();
+        EnsureCorrectState();
     }
 
+    protected void EnsureCorrectState()
+    {
+        if (StoragePath == null)
+        {
+            Logger.LogError("Storage path not set");
+            return;
+        }
+        if (!File.Exists(StoragePath))
+        {
+            Logger.LogDebug("Storage file does not exist, creating new one");
+            File.Create(StoragePath).Dispose();
+            UpdateState();
+            return;
+        }
+        var content = File.ReadAllText(StoragePath);
+        var jsonContent = JsonConvert.DeserializeObject<JsonStorageSchema>(content);
+        if (jsonContent == null)
+        {
+            Logger.LogError("Could not deserialize storage file content");
+            return;
+        }
+        
+        Logger.LogDebug("Storage file content: {Content}", jsonContent);
+        
+    }   
+    
     protected bool WorkingHours()
     {
         var now = DateTime.Now.TimeOfDay;
@@ -47,7 +79,7 @@ public abstract class BaseFsm<TState, TTRigger>
     
     protected void UpdateState()
     {
-        Logger.LogDebug("Updating state in storage {State}", State);
+        Logger.LogDebug("Updating state in storage ({Path}) {State}", StoragePath, State);
         File.WriteAllText(StoragePath, ToJson());
     }
 

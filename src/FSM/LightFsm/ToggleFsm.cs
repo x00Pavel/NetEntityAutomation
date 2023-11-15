@@ -20,7 +20,7 @@ public enum ToggleFsmTrigger
 
 public class ToggleFsm : LightFsm<ToggleFsmState, ToggleFsmTrigger>
 {
-    public ToggleFsm(ILogger logger, IFsmConfig<ToggleFsmState> config) : base(logger, config)
+    public ToggleFsm(ILogger logger, IFsmConfig<ToggleFsmState> config, string storagePath) : base(logger, config, storagePath)
     {
     }
     
