@@ -15,10 +15,9 @@ public class OnOffLightAutomation: LightAutomation<OnOffFsmState>
 
     public OnOffLightAutomation(IHaContext ha, IAutomationConfig<OnOffFsmState> config, ILogger logger): base(logger, config, ha)
     {
-        _fsm = new MotionSwitchLightFsm(logger, Config.FsmConfig)
+        _fsm = new MotionSwitchLightFsm(logger, Config.FsmConfig, $"storage/{config.Name.Replace(' ', '_')}_fsm.json")
         {
             TimerTrigger = OnOffFsmTrigger.TimeElapsed,
-            StoragePath = $"storage/{config.Name}_fsm.json"
         };
         InitFsmTransitions();
         logger.LogInformation("LightAutomation initialised");
