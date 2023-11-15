@@ -6,7 +6,7 @@ namespace NetEntityAutomation.FSM.LightFsm;
 
 public abstract class LightFsm<TState, TTRigger> : BaseFsm<TState, TTRigger> where TTRigger : Enum where TState : Enum
 {
-    protected LightFsm(ILogger logger, IFsmConfig<TState> config) : base(logger, config)
+    protected LightFsm(ILogger logger, IFsmConfig<TState> config, string storagePath) : base(logger, config, storagePath)
     {
     }
 
