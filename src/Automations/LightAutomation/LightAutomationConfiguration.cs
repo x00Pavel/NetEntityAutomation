@@ -8,7 +8,7 @@ public record LightAutomationConfiguration<TFsmState>: IAutomationConfig<TFsmSta
 {
     public string Name { get; set; }
     public IBinarySensorEntityCore MotionSensors { get; set; }
-    public string? SwitchId { get; set;  }
+    public IEnumerable<string>? SwitchIds { get; set; }
     public IFsmConfig<TFsmState> FsmConfig { get; set; }
     
 }

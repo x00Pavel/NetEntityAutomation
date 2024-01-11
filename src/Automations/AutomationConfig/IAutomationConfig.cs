@@ -6,6 +6,6 @@ public interface IAutomationConfig<TFsmState> where TFsmState : Enum
 {
     public string Name { get; }
     public IBinarySensorEntityCore MotionSensors { get; }
-    public string? SwitchId { get; }
+    public IEnumerable<string>? SwitchIds { get; }
     public IFsmConfig<TFsmState> FsmConfig { get; }
 }
