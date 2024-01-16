@@ -17,7 +17,9 @@ public abstract class BaseFsm<TState, TTRigger>
     public TState State => StateMachine.State;
     protected readonly StateMachine<TState, TTRigger> StateMachine;
     public required TTRigger TimerTrigger { get; init; }
-
+    
+    public bool IsEnabled { get; set; } = true;
+    
     protected BaseFsm(ILogger logger, IFsmConfig<TState> config)
     {
         Logger = logger;
@@ -38,7 +40,7 @@ public abstract class BaseFsm<TState, TTRigger>
 
     protected bool SensorConditions()
     {   
-        var result = WorkingHours() && Config.SensorConditionMet; 
+        var result = WorkingHours() && Config.SensorConditionMet && IsEnabled; 
         Logger.LogDebug("Sensor conditions met: {Conditions}", result);
         return result;
     }

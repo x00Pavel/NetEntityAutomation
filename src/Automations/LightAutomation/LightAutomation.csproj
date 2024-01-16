@@ -18,4 +18,8 @@
         <ProjectReference Include="..\AutomationConfig\AutomationConfig.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <PackageReference Include="JoySoftware.NetDaemon.HassModel.Integration" Version="23.44.1" />
+    </ItemGroup>
+
 </Project>
