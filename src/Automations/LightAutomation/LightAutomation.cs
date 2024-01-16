@@ -18,6 +18,6 @@ public abstract class LightAutomation<TFsmState>: BaseAutomation<TFsmState> wher
 
     protected IObservable<ZhaEventData> SwitchEvent =>
         HaContext.Events.Filter<ZhaEventData>("zha_event")
-            .Where(e => e.Data?.DeviceIeee == Config.SwitchId)
+            .Where(e => Config.SwitchIds?.Contains(e.Data?.DeviceIeee) ?? false)
             .Select(e => e.Data!);
 }
