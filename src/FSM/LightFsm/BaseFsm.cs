@@ -17,7 +17,6 @@ public abstract class BaseFsm<TState, TTRigger>
     public TState State => StateMachine.State;
     protected readonly StateMachine<TState, TTRigger> StateMachine;
     public required TTRigger TimerTrigger { get; init; }
-    
     public bool IsEnabled { get; set; } = true;
     
     protected BaseFsm(ILogger logger, IFsmConfig<TState> config)
@@ -48,6 +47,7 @@ public abstract class BaseFsm<TState, TTRigger>
     protected void UpdateState()
     {
         Logger.LogDebug("Updating state in storage {State}", State);
+        Logger.LogDebug("State of FSM is {Enabled}", IsEnabled);
         File.WriteAllText(StoragePath, ToJson());
     }
 

@@ -1,3 +1,4 @@
+using System.Reactive.Linq;
 using Microsoft.Extensions.Logging;
 using NetDaemon.HassModel;
 using NetDaemon.HassModel.Integration;
@@ -17,7 +18,7 @@ internal enum ServiceAction
     Toggle,
 }
 
-record ServiceData
+internal record ServiceData
 {
     public string? action { get; init; }
     public string? value { get; init; }
@@ -31,7 +32,19 @@ public abstract class BaseAutomation<TFsmState> where TFsmState: struct, Enum
 
     protected IHaContext HaContext;
 
-    private bool IsEnabled { get; set; } = true;
+    protected readonly IObservable<bool> IsEnabledObserver;
+    private bool isEnabled { get; set; } = true;
+    public event EventHandler<bool>? IsEnabledChanged;
+    public bool IsEnabled
+    {
+        get => isEnabled;
+        set
+        {
+            if (isEnabled == value) return;
+            isEnabled = value;
+            OnIsEnabledChanged(value);
+        }
+    }
     
     protected BaseAutomation(
         ILogger logger,
@@ -42,6 +55,10 @@ public abstract class BaseAutomation<TFsmState> where TFsmState: struct, Enum
         Logger = logger;
         Config = config;
         HaContext = haContext;
+        IsEnabledObserver = Observable.FromEventPattern<bool>(
+            handler => IsEnabledChanged += handler,
+            handler => IsEnabledChanged -= handler
+        ).Select(pattern => pattern.EventArgs);
         InitServices();
     }
     
@@ -58,10 +75,11 @@ public abstract class BaseAutomation<TFsmState> where TFsmState: struct, Enum
                     {
                         ServiceAction.Disable => false,
                         ServiceAction.Enable => true,
-                        ServiceAction.Toggle => !IsEnabled,
-                        _ => IsEnabled
+                        ServiceAction.Toggle => !isEnabled,
+                        _ => isEnabled
                     };
-                    Logger.LogDebug("Automation {AutomationName} is now {AutomationState}", Config.Name, IsEnabled ? "enabled" : "disabled");
+                    
+                    Logger.LogDebug("Automation {AutomationName} is now {AutomationState}", Config.Name, isEnabled ? "enabled" : "disabled");
                 }
                 else
                 {
@@ -72,5 +90,10 @@ public abstract class BaseAutomation<TFsmState> where TFsmState: struct, Enum
 
     }
 
+    private void OnIsEnabledChanged(bool value)
+    {
+        IsEnabledChanged?.Invoke(this, value);
+    }
+    
     protected abstract void InitFsmTransitions();
 }
