@@ -42,7 +42,7 @@ public abstract class BaseAutomation<TFsmState> where TFsmState: struct, Enum
         {
             if (isEnabled == value) return;
             isEnabled = value;
-            OnIsEnabledChanged(value);
+            IsEnabledChanged?.Invoke(this, value);
         }
     }
     
@@ -55,6 +55,7 @@ public abstract class BaseAutomation<TFsmState> where TFsmState: struct, Enum
         Logger = logger;
         Config = config;
         HaContext = haContext;
+        // Creates observable event for IsEnabledChanged
         IsEnabledObserver = Observable.FromEventPattern<bool>(
             handler => IsEnabledChanged += handler,
             handler => IsEnabledChanged -= handler
@@ -88,11 +89,6 @@ public abstract class BaseAutomation<TFsmState> where TFsmState: struct, Enum
                 }
             });
 
-    }
-
-    private void OnIsEnabledChanged(bool value)
-    {
-        IsEnabledChanged?.Invoke(this, value);
     }
     
     protected abstract void InitFsmTransitions();

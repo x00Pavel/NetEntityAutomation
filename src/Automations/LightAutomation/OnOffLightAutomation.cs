@@ -32,6 +32,5 @@ public class OnOffLightAutomation: LightAutomation<OnOffFsmState>
         SwitchEvent.Where(e => e.Command == "on").Subscribe(_ => _fsm.SwitchOn());
         SwitchEvent.Where(e => e.Command == "off").Subscribe(_ => _fsm.SwitchOff());
         IsEnabledObserver.Subscribe(value => _fsm.IsEnabled = value);
-
     }
 }
