@@ -18,16 +18,16 @@ public enum ToggleFsmTrigger
     TimeElapsed
 }
 
-public class ToggleFsm : LightFsm<ToggleFsmState, ToggleFsmTrigger>
+public class ToggleLightFsm : LightFsm<ToggleFsmState, ToggleFsmTrigger>
 {
-    public ToggleFsm(ILogger logger, IFsmConfig<ToggleFsmState> config) : base(logger, config)
+    public ToggleLightFsm(ILogger logger, IFsmConfig<ToggleFsmState> config, string storageFileName) : base(logger, config, storageFileName)
     {
     }
-    
+
     protected override void InitFsm()
     {
-        StateMachine.OnTransitionCompleted(_ => UpdateState());
         StateMachine.Configure(ToggleFsmState.Off)
+            .OnActivate(TurnOffLights)
             .OnEntry(TurnOffLights)
             .Ignore(ToggleFsmTrigger.TimeElapsed)
             .Ignore(ToggleFsmTrigger.MotionOff)
@@ -35,47 +35,22 @@ public class ToggleFsm : LightFsm<ToggleFsmState, ToggleFsmTrigger>
             .Permit(ToggleFsmTrigger.Toggle, ToggleFsmState.On);
 
         StateMachine.Configure(ToggleFsmState.On)
-            .OnEntry(TurnOnLights)
-            .OnEntry(() => StartTimer(Config.HoldOnTime))
+            .OnActivate(() => TurnOnWithTimer(Config.HoldOnTime))
+            .OnEntry(() => TurnOnWithTimer(Config.HoldOnTime))
             .PermitReentry(ToggleFsmTrigger.MotionOn)
             .Permit(ToggleFsmTrigger.TimeElapsed, ToggleFsmState.WaitingForMotion)
             .Permit(ToggleFsmTrigger.MotionOff, ToggleFsmState.WaitingForMotion)
             .Permit(ToggleFsmTrigger.Toggle, ToggleFsmState.Off);
 
         StateMachine.Configure(ToggleFsmState.WaitingForMotion)
-            .OnEntry(() => StartTimer(Config.WaitForOffTime))
+            .OnActivate(() => TurnOnWithTimer(Config.WaitForOffTime))
+            .OnEntry(() => TurnOnWithTimer(Config.WaitForOffTime))
             .Ignore(ToggleFsmTrigger.MotionOff)
             .Permit(ToggleFsmTrigger.TimeElapsed, ToggleFsmState.Off)
             .Permit(ToggleFsmTrigger.MotionOn, ToggleFsmState.On)
             .Permit(ToggleFsmTrigger.Toggle, ToggleFsmState.Off);
     }
-
-    public void MotionOn()
-    {
-        try
-        {
-            Logger.LogInformation("Motion on");
-            StateMachine.Fire(ToggleFsmTrigger.MotionOn);
-        }
-        catch (InvalidOperationException e)
-        {
-            Logger.LogInformation(e.Message);
-        }
-    }
-
-    public void MotionOff()
-    {
-        try
-        {
-            Logger.LogInformation("Motion off");
-            StateMachine.Fire(ToggleFsmTrigger.MotionOff);
-        }
-        catch (InvalidOperationException e)
-        {
-            Logger.LogInformation(e.Message);
-        }
-    }
-
+    
     public void Toggle()
     {
         try

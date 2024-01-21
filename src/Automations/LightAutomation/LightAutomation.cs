@@ -14,7 +14,7 @@ public abstract class LightAutomation<TFsmState>: BaseAutomation<TFsmState> wher
     }
 
     protected IObservable<StateChange> MotionSensorEvent =>
-        HaContext.StateChanges().Where(e => e.New?.EntityId == Config.MotionSensors.EntityId);
+        HaContext.StateChanges().Where(e => Config.MotionSensors.Any(s => s.EntityId == e.New?.EntityId));
 
     protected IObservable<ZhaEventData> SwitchEvent =>
         HaContext.Events.Filter<ZhaEventData>("zha_event")

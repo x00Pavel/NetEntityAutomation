@@ -14,7 +14,7 @@
     <ItemGroup>
         <PackageReference Include="JoySoftware.NetDaemon.HassModel" Version="23.33.0"/>
         <PackageReference Include="Newtonsoft.Json" Version="13.0.3"/>
-        <PackageReference Include="Stateless" Version="5.13.0"/>
+        <PackageReference Include="Stateless" Version="5.15.0" />
     </ItemGroup>
 
     <ItemGroup>

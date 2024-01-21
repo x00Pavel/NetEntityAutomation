@@ -6,29 +6,60 @@ using Stateless;
 
 namespace NetEntityAutomation.FSM.LightFsm;
 
-public abstract class BaseFsm<TState, TTRigger>
-    where TState : Enum where TTRigger : Enum
+public abstract class BaseLightFsm<TState, TTrigger>
+    where TState : Enum where TTrigger : Enum
 {
+    protected record JsonStorageSchema(TState State);
+
     protected readonly ILogger Logger;
     protected readonly IFsmConfig<TState> Config;
     protected IDisposable? Timer;
-    public required string StoragePath { get; init; }
+    private string StoragePath { get; init; }
     
-    public TState State => StateMachine.State;
-    protected readonly StateMachine<TState, TTRigger> StateMachine;
-    public required TTRigger TimerTrigger { get; init; }
+    protected TState State => StateMachine.State;
+    protected readonly StateMachine<TState, TTrigger> StateMachine;
+    public required TTrigger TimerTrigger { get; init; }
     public bool IsEnabled { get; set; } = true;
     
-    protected BaseFsm(ILogger logger, IFsmConfig<TState> config)
+    protected BaseLightFsm(ILogger logger, IFsmConfig<TState> config, string storageFileName)
     {
         Logger = logger;
         Config = config;
+        StoragePath = $"storage/{storageFileName}_fsm.json";
         logger.LogDebug("Night mode enabled: {Enabled}", config.NightMode);
         logger.LogDebug("FSM configuration: {Config}", Config);
-        StateMachine = new StateMachine<TState, TTRigger>(Config.InitialState);
+        StateMachine = new StateMachine<TState, TTrigger>(GetStateFromStorage, StoreState);
         InitFsm();
+        Logger.LogDebug("Current state of the FSM: {State}", StateMachine.State);
+        StateMachine.Activate();
     }
 
+    private void StoreState(TState state)
+    {
+        Logger.LogDebug("Storing state in storage ({Path}) {State}", StoragePath, state);
+        File.WriteAllText(StoragePath, "{\"State\": " + JsonConvert.SerializeObject(state) + "}");
+    }
+    
+    private TState GetStateFromStorage()
+    {   
+        Logger.LogInformation("Getting state from storage ({Path})", StoragePath);
+        if (!File.Exists(StoragePath))
+        {
+            Logger.LogDebug("Storage file does not exist, creating new one");
+            File.Create(StoragePath).Dispose();
+            return Config.InitialState;
+        }
+        var content = File.ReadAllText(StoragePath);
+        var jsonContent = JsonConvert.DeserializeObject<JsonStorageSchema>(content);
+        if (jsonContent != null)
+        {
+            Logger.LogDebug("Storage file content: {Content}", jsonContent);
+            return jsonContent.State;
+        }
+        Logger.LogError("Could not deserialize storage file content");
+        return Config.InitialState;
+    }
+    
     protected bool WorkingHours()
     {
         var now = DateTime.Now.TimeOfDay;
@@ -44,22 +75,6 @@ public abstract class BaseFsm<TState, TTRigger>
         return result;
     }
     
-    protected void UpdateState()
-    {
-        Logger.LogDebug("Updating state in storage {State}", State);
-        Logger.LogDebug("State of FSM is {Enabled}", IsEnabled);
-        File.WriteAllText(StoragePath, ToJson());
-    }
-
-    private string ToJson()
-    {
-        return JsonConvert.SerializeObject(this);
-    }
-
-    public static MotionSwitchLightFsm? FromJson(string jsonString)
-    {
-        return JsonConvert.DeserializeObject<MotionSwitchLightFsm>(jsonString);
-    }
 
     protected void StartTimer(TimeSpan waitTime)
     {
