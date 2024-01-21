@@ -7,7 +7,7 @@ namespace NetEntityAutomation.Automations.LightAutomation;
 public record LightAutomationConfiguration<TFsmState>: IAutomationConfig<TFsmState> where TFsmState : Enum
 {
     public string Name { get; set; }
-    public IBinarySensorEntityCore MotionSensors { get; set; }
+    public IEnumerable<IBinarySensorEntityCore> MotionSensors { get; set; }
     public IEnumerable<string>? SwitchIds { get; set; }
     public IFsmConfig<TFsmState> FsmConfig { get; set; }
     
