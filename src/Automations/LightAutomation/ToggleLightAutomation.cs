@@ -26,6 +26,6 @@ public class ToggleLightAutomation: LightAutomation<ToggleFsmState>
         MotionSensorEvent.Where(e => e.New?.State == "on").Subscribe(_ => _lightFsm.MotionOn(ToggleFsmTrigger.MotionOn));
         MotionSensorEvent.Where(e => e.New?.State == "off").Subscribe(_ => _lightFsm.MotionOff(ToggleFsmTrigger.MotionOff));
         SwitchEvent.Where(e => e.Command == "toggle").Subscribe(_ => _lightFsm.Toggle());
-        IsEnabledObserver.Subscribe(value => _fsm.IsEnabled = value);
+        IsEnabledObserver.Subscribe(value => _lightFsm.IsEnabled = value);
     }
 }

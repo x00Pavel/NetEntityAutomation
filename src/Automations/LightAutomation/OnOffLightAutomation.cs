@@ -30,6 +30,6 @@ public class OnOffLightAutomation: LightAutomation<OnOffFsmState>
         MotionSensorEvent.Where(e => e.New?.State == "off").Subscribe(_ => _lightFsm.MotionOff(OnOffFsmTrigger.MotionOff));
         SwitchEvent.Where(e => e.Command == "on").Subscribe(_ => _lightFsm.SwitchOn());
         SwitchEvent.Where(e => e.Command == "off").Subscribe(_ => _lightFsm.SwitchOff());
-        BaseLightFsm
+        IsEnabledObserver.Subscribe(value => _lightFsm.IsEnabled = value);
     }
 }
