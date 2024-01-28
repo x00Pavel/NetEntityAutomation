@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFramework>net7.0</TargetFramework>
+        <TargetFramework>net8.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <AssemblyName>NetEntityAutomation.Automations.AutomationConfig</AssemblyName>
@@ -9,7 +9,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="JoySoftware.NetDaemon.HassModel" Version="23.33.0" />
+      <PackageReference Include="NetDaemon.HassModel" Version="24.3.1" />
       <PackageReference Include="Scrutor" Version="4.2.2" />
     </ItemGroup>
 
