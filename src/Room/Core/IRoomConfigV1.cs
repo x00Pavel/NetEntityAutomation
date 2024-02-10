@@ -1,8 +1,6 @@
 using Microsoft.Extensions.Logging;
-using NetDaemon.HassModel;
 using NetEntityAutomation.Automations.AutomationConfig;
 using NetEntityAutomation.FSM.LightFsm;
-using NetEntityAutomation.Room.Conditions;
 
 namespace NetEntityAutomation.Room.Core;
 

@@ -1,0 +1,22 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net8.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <Authors>Pavel Yadlouski</Authors>
+        <PackageProjectUrl>https://github.com/x00Pavel/NetEntityAutomation</PackageProjectUrl>
+        <RepositoryUrl>https://github.com/x00Pavel/NetEntityAutomation</RepositoryUrl>
+        <AssemblyName>NetEntityAutomation.Extesions.Types</AssemblyName>
+        <RootNamespace>NetEntityAutomation.Extensions.Types</RootNamespace>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <PackageReference Include="NetDaemon.HassModel" Version="24.3.1" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\Events\Events.csproj" />
+    </ItemGroup>
+
+</Project>

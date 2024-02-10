@@ -22,13 +22,13 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AutomationConfig", "src\Aut
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mapping", "src\Extensions\Mapping\Mapping.csproj", "{DF288709-6CDF-4A89-B01E-F4014B6A9838}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Room", "Room", "{177B0AD3-49BE-47CF-8C21-EC9E9D65165A}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Room", "src\Room", "{177B0AD3-49BE-47CF-8C21-EC9E9D65165A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Core", "Room\Core\Core.csproj", "{420630A7-7890-4ABE-8903-D50B01E316A5}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Core", "src\Room\Core\Core.csproj", "{420630A7-7890-4ABE-8903-D50B01E316A5}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Triggers", "Room\Triggers\Triggers.csproj", "{EC9AF70B-6434-4D7E-B27A-847AB6D12E22}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Triggers", "src\Room\Triggers\Triggers.csproj", "{EC9AF70B-6434-4D7E-B27A-847AB6D12E22}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Conditions", "Room\Conditions\Conditions.csproj", "{1FDF2408-254F-4119-944A-795BBAFCA092}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Conditions", "src\Room\Conditions\Conditions.csproj", "{1FDF2408-254F-4119-944A-795BBAFCA092}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Types", "src\Extensions\Types\Types.csproj", "{C87B8D36-91D2-4B72-A26B-A5F404CA59DC}"
 EndProject
