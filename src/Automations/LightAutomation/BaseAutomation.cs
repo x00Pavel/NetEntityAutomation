@@ -1,6 +1,7 @@
 using System.Reactive.Linq;
 using Microsoft.Extensions.Logging;
 using NetDaemon.HassModel;
+using NetDaemon.HassModel.Entities;
 using NetDaemon.HassModel.Integration;
 using NetEntityAutomation.Automations.AutomationConfig;
 
@@ -28,13 +29,14 @@ public abstract class BaseAutomation<TFsmState> where TFsmState: struct, Enum
 {
     protected ILogger Logger;
 
-    protected IAutomationConfig<TFsmState> Config;
+    protected ILightAutomationConfiguration<TFsmState> Config;
 
     protected IHaContext HaContext;
 
     protected readonly IObservable<bool> IsEnabledObserver;
     private bool isEnabled { get; set; } = true;
     public event EventHandler<bool>? IsEnabledChanged;
+    protected IEnumerable<ILightEntityCore> _lights => Config.Lights;
     public bool IsEnabled
     {
         get => isEnabled;
@@ -48,7 +50,7 @@ public abstract class BaseAutomation<TFsmState> where TFsmState: struct, Enum
     
     protected BaseAutomation(
         ILogger logger,
-        IAutomationConfig<TFsmState> config,
+        ILightAutomationConfiguration<TFsmState> config,
         IHaContext haContext
         )
     {
@@ -65,7 +67,7 @@ public abstract class BaseAutomation<TFsmState> where TFsmState: struct, Enum
     
     private void InitServices()
     {
-        HaContext.RegisterServiceCallBack<ServiceData>($"disable_automation_{Config.Name.Replace(' ', '_').ToLower()}", 
+        HaContext.RegisterServiceCallBack<ServiceData>($"automation_{Config.Name.Replace(' ', '_').ToLower()}_service", 
             e =>
             {
                 if (Enum.TryParse<ServiceAction>(e.action, ignoreCase: true, out var action))

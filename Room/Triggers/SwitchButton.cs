@@ -1,0 +1,1 @@
+namespace NetEntityAutomation.Room.Triggers;

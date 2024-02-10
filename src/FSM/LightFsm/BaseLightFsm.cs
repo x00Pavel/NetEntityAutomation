@@ -6,30 +6,27 @@ using Stateless;
 
 namespace NetEntityAutomation.FSM.LightFsm;
 
-public abstract class BaseLightFsm<TState, TTrigger>
+public abstract class  BaseLightFsm<TState, TTrigger>: IFsmBase
     where TState : Enum where TTrigger : Enum
 {
     protected record JsonStorageSchema(TState State);
-
-    protected readonly ILogger Logger;
-    protected readonly IFsmConfig<TState> Config;
-    protected IDisposable? Timer;
-    private string StoragePath { get; init; }
     
-    protected TState State => StateMachine.State;
+    public readonly IFsmConfig<TState> Config;
+    
+    public TState State => StateMachine.State;
     protected readonly StateMachine<TState, TTrigger> StateMachine;
     public required TTrigger TimerTrigger { get; init; }
-    public bool IsEnabled { get; set; } = true;
+    
     
     protected BaseLightFsm(ILogger logger, IFsmConfig<TState> config, string storageFileName)
     {
         Logger = logger;
         Config = config;
         StoragePath = $"storage/{storageFileName}_fsm.json";
-        logger.LogDebug("Night mode enabled: {Enabled}", config.NightMode);
+        // logger.LogDebug("Night mode enabled: {Enabled}", config.NightMode);
         logger.LogDebug("FSM configuration: {Config}", Config);
         StateMachine = new StateMachine<TState, TTrigger>(GetStateFromStorage, StoreState);
-        InitFsm();
+        ConfigureFsm();
         Logger.LogDebug("Current state of the FSM: {State}", StateMachine.State);
         StateMachine.Activate();
     }
@@ -78,13 +75,13 @@ public abstract class BaseLightFsm<TState, TTrigger>
 
     protected void StartTimer(TimeSpan waitTime)
     {
-        Logger.LogDebug("Starting timer for {WaitHours}:{WaitMinutes}:{WaitTime}", waitTime.Hours, waitTime.Minutes, waitTime.Seconds);
-        Timer?.Dispose();
-        Timer = Observable.Timer(waitTime)
-            .Subscribe(_ => TimeElapsed());
+        // Logger.LogDebug("Starting timer for {WaitHours}:{WaitMinutes}:{WaitTime}", waitTime.Hours, waitTime.Minutes, waitTime.Seconds);
+        // Timer?.Dispose();
+        // Timer = Observable.Timer(waitTime)
+        //     .Subscribe(_ => TimeElapsed());
     }
 
-    private void TimeElapsed()
+    public void TimeElapsed()
     {
         try
         {
@@ -96,6 +93,4 @@ public abstract class BaseLightFsm<TState, TTrigger>
             Logger.LogError(e.Message);
         }
     }
-
-    protected abstract void InitFsm();
 }

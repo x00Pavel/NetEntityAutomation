@@ -16,11 +16,9 @@ public class FsmConfig<TFsmState>: IFsmConfig<TFsmState> where TFsmState : Enum
     public TimeSpan WaitForOffTime => TimeSpan.FromSeconds(WaitForOffSeconds) + TimeSpan.FromMinutes(WaitForOffMinutes);
 
     public required TFsmState InitialState { get; init; }
-
-    /// <summary> Add custom behaviour during the night </summary>
-    public INightModeConfig NightMode { get; init; } = new NightModeConfig();
-
-    public required IEnumerable<ILightEntityCore> Lights { get; init; }
+    
+    // Moved to LightAutomationConfig
+    // public required IEnumerable<ILightEntityCore> Lights { get; init; }
 
     /// <summary> Function that dynamically returns the start time </summary>
     public Func<TimeSpan> StartAtTimeFunc { get; set; } = () => DateTime.Parse(DefaultStartTime).TimeOfDay;

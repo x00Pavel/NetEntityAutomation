@@ -11,4 +11,8 @@
         <AssemblyName>NetEntityAutomation.Extesions.Events</AssemblyName>
     </PropertyGroup>
 
+    <ItemGroup>
+      <PackageReference Include="NetDaemon.HassModel" Version="24.3.1" />
+    </ItemGroup>
+
 </Project>
