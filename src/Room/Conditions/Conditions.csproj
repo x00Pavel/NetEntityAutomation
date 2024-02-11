@@ -1,19 +1,14 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
         <TargetFramework>net8.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
-        <RootNamespace>NetEntityAutomation.Extensions.LightExtensionMethods</RootNamespace>
+        <RootNamespace>NetEntityAutomation.Room.Conditions</RootNamespace>
+        <AssemblyName>NetEntityAutomation.Room.Conditions</AssemblyName>
         <Authors>Pavel Yadlouski</Authors>
         <PackageProjectUrl>https://github.com/x00Pavel/NetEntityAutomation</PackageProjectUrl>
         <RepositoryUrl>https://github.com/x00Pavel/NetEntityAutomation</RepositoryUrl>
-        <AssemblyName>NetEntityAutomation.Extensions.LightExtensionMethods</AssemblyName>
     </PropertyGroup>
-
-    <ItemGroup>
-        <PackageReference Include="NetDaemon.HassModel" Version="24.3.1" />
-        <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
-    </ItemGroup>
 
 </Project>

@@ -13,7 +13,7 @@ public class OnOffLightAutomation: LightAutomation<OnOffFsmState>
 {   
     private readonly OnOffLightFsm _lightFsm;
 
-    public OnOffLightAutomation(IHaContext ha, IAutomationConfig<OnOffFsmState> config, ILogger logger): base(logger, config, ha)
+    public OnOffLightAutomation(IHaContext ha, ILightAutomationConfiguration<OnOffFsmState> config, ILogger logger): base(logger, config, ha)
     {
         _lightFsm = new OnOffLightFsm(logger, Config.FsmConfig, Config.ProgramName)
         {
@@ -28,8 +28,8 @@ public class OnOffLightAutomation: LightAutomation<OnOffFsmState>
         Logger.LogInformation("Initialising FSM for {RoomName}", Config.Name);
         MotionSensorEvent.Where(e => e.New?.State == "on").Subscribe(_ => _lightFsm.MotionOn(OnOffFsmTrigger.MotionOn));
         MotionSensorEvent.Where(e => e.New?.State == "off").Subscribe(_ => _lightFsm.MotionOff(OnOffFsmTrigger.MotionOff));
-        SwitchEvent.Where(e => e.Command == "on").Subscribe(_ => _lightFsm.SwitchOn());
-        SwitchEvent.Where(e => e.Command == "off").Subscribe(_ => _lightFsm.SwitchOff());
+        ZhaSwitchEvent.Where(e => e.Command == "on").Subscribe(_ => _lightFsm.SwitchOn());
+        ZhaSwitchEvent.Where(e => e.Command == "off").Subscribe(_ => _lightFsm.SwitchOff());
         IsEnabledObserver.Subscribe(value => _lightFsm.IsEnabled = value);
     }
 }

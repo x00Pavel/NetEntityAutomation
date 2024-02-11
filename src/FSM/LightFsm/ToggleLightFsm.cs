@@ -18,13 +18,10 @@ public enum ToggleFsmTrigger
     TimeElapsed
 }
 
-public class ToggleLightFsm : LightFsm<ToggleFsmState, ToggleFsmTrigger>
+public class ToggleLightFsm(ILogger logger, IFsmConfig<ToggleFsmState> config, string storageFileName)
+    : LightFsm<ToggleFsmState, ToggleFsmTrigger>(logger, config, storageFileName)
 {
-    public ToggleLightFsm(ILogger logger, IFsmConfig<ToggleFsmState> config, string storageFileName) : base(logger, config, storageFileName)
-    {
-    }
-
-    protected override void InitFsm()
+    protected override void ConfigureFsm()
     {
         StateMachine.Configure(ToggleFsmState.Off)
             .OnActivate(TurnOffLights)
@@ -35,22 +32,32 @@ public class ToggleLightFsm : LightFsm<ToggleFsmState, ToggleFsmTrigger>
             .Permit(ToggleFsmTrigger.Toggle, ToggleFsmState.On);
 
         StateMachine.Configure(ToggleFsmState.On)
-            .OnActivate(() => TurnOnWithTimer(Config.HoldOnTime))
-            .OnEntry(() => TurnOnWithTimer(Config.HoldOnTime))
+            .OnActivate(() => StartTimer(Config.HoldOnTime))
+            .OnEntry(() => StartTimer(Config.HoldOnTime))
             .PermitReentry(ToggleFsmTrigger.MotionOn)
             .Permit(ToggleFsmTrigger.TimeElapsed, ToggleFsmState.WaitingForMotion)
             .Permit(ToggleFsmTrigger.MotionOff, ToggleFsmState.WaitingForMotion)
             .Permit(ToggleFsmTrigger.Toggle, ToggleFsmState.Off);
 
         StateMachine.Configure(ToggleFsmState.WaitingForMotion)
-            .OnActivate(() => TurnOnWithTimer(Config.WaitForOffTime))
-            .OnEntry(() => TurnOnWithTimer(Config.WaitForOffTime))
+            .OnActivate(() => StartTimer(Config.WaitForOffTime))
+            .OnEntry(() => StartTimer(Config.WaitForOffTime))
             .Ignore(ToggleFsmTrigger.MotionOff)
             .Permit(ToggleFsmTrigger.TimeElapsed, ToggleFsmState.Off)
             .Permit(ToggleFsmTrigger.MotionOn, ToggleFsmState.On)
             .Permit(ToggleFsmTrigger.Toggle, ToggleFsmState.Off);
     }
-    
+
+    public override void FireOn()
+    {
+        throw new NotImplementedException();
+    }
+
+    public override void FireOff()
+    {
+        throw new NotImplementedException();
+    }
+
     public void Toggle()
     {
         try

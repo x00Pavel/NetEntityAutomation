@@ -30,7 +30,7 @@ public class OnOffLightFsm : LightFsm<OnOffFsmState, OnOffFsmTrigger>
     {
     }
     
-    protected override void InitFsm()
+    protected override void ConfigureFsm()
     {
         // Switch triggers the action without any conditions
         StateMachine.Configure(OnOffFsmState.Off)
@@ -43,9 +43,8 @@ public class OnOffLightFsm : LightFsm<OnOffFsmState, OnOffFsmTrigger>
             .PermitIf(OnOffFsmTrigger.SwitchOn, OnOffFsmState.OnBySwitch, () => Config.SwitchConditionMet);
 
         StateMachine.Configure(OnOffFsmState.OnByMotion)
-            .OnActivate(() => TurnOnWithTimer(Config.HoldOnTime))
-            .OnEntry(() => TurnOnWithTimer(Config.HoldOnTime))
-            .OnEntry(() => StartTimer(TimeSpan.FromMinutes(5))) // FIXME: move this value to the config
+            .OnActivate(() => StartTimer(Config.HoldOnTime))
+            .OnEntry(() => StartTimer(Config.HoldOnTime))
             .PermitReentry(OnOffFsmTrigger.MotionOn)
             .Permit(OnOffFsmTrigger.TimeElapsed, OnOffFsmState.OnBySwitch)
             .Permit(OnOffFsmTrigger.SwitchOn, OnOffFsmState.OnBySwitch)
@@ -53,8 +52,7 @@ public class OnOffLightFsm : LightFsm<OnOffFsmState, OnOffFsmTrigger>
             .Permit(OnOffFsmTrigger.SwitchOff, OnOffFsmState.Off);
 
         StateMachine.Configure(OnOffFsmState.OnBySwitch)
-            .OnActivate(() => TurnOnWithTimer(Config.HoldOnTime))
-            .OnEntry(() => TurnOnWithTimer(Config.HoldOnTime))
+            .OnActivate(() => StartTimer(Config.HoldOnTime))
             .OnEntry(() => StartTimer(Config.HoldOnTime))
             .PermitReentry(OnOffFsmTrigger.MotionOn)
             .Ignore(OnOffFsmTrigger.MotionOff)
@@ -63,14 +61,24 @@ public class OnOffLightFsm : LightFsm<OnOffFsmState, OnOffFsmTrigger>
             .PermitIf(OnOffFsmTrigger.TimeElapsed, OnOffFsmState.WaitingForMotion, WorkingHours);
 
         StateMachine.Configure(OnOffFsmState.WaitingForMotion)
-            .OnActivate(() => TurnOnWithTimer(Config.HoldOnTime))
-            .OnEntry(() => TurnOnWithTimer(Config.HoldOnTime))
+            .OnActivate(() => StartTimer(Config.HoldOnTime))
+            .OnEntry(() => StartTimer(Config.HoldOnTime))
             .Ignore(OnOffFsmTrigger.MotionOff)
             .PermitIf(OnOffFsmTrigger.MotionOn, OnOffFsmState.OnBySwitch, SensorConditions)
             .Permit(OnOffFsmTrigger.SwitchOn, OnOffFsmState.OnBySwitch)
             .Permit(OnOffFsmTrigger.SwitchOff, OnOffFsmState.Off)
             .Permit(OnOffFsmTrigger.TimeElapsed, OnOffFsmState.Off);
         Logger.LogInformation("FSM initialized in state {State}", State);
+    }
+
+    public override void FireOn()
+    {
+        throw new NotImplementedException();
+    }
+
+    public override void FireOff()
+    {
+        throw new NotImplementedException();
     }
 
     public void SwitchOn()

@@ -1,0 +1,21 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net8.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <AssemblyName>NetEntityAutomation.Room.Triggers</AssemblyName>
+        <RootNamespace>NetEntityAutomation.Room.Triggers</RootNamespace>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <PackageReference Include="NetDaemon.HassModel" Version="24.3.1" />
+      <PackageReference Include="Stateless" Version="5.15.0" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\..\Extensions\Events\Events.csproj" />
+      <ProjectReference Include="..\..\FSM\LightFsm\LightFsm.csproj" />
+    </ItemGroup>
+
+</Project>
