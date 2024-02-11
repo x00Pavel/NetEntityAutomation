@@ -45,55 +45,67 @@ public class LightAutomation: IAutomation
 
     private void TurnOffByAutomation(StateChange e)
     {
-        if (IsWorkingHours())
-        {   
-            
-            _logger.LogDebug("Turning off lights by motion sensor {Sensor}", e.Entity.EntityId);
-            LightOnByAutomation.Select(fsm => fsm.Light).TurnOff();
-        }
-        else
+        if (!IsWorkingHours())
+        {
             _logger.LogDebug("Turning off lights by motion sensor {Sensor} is not allowed because it's not working hours", e.Entity.EntityId);
+            return;
+        }
+
+        if (!_config.Conditions.All(c => c.IsTrue()))
+        {
+            _logger.LogDebug("Not all conditions are met to turn off lights by motion sensor {Sensor}", e.Entity.EntityId);
+            return;
+        }   
+            
+        _logger.LogDebug("Turning off lights by motion sensor {Sensor}", e.Entity.EntityId);
+        LightOnByAutomation.Select(fsm => fsm.Light).TurnOff();
     }
     
     private void TurnOnByAutomation(StateChange e)
     {
-        if (IsWorkingHours())
+        if (!IsWorkingHours())
         {
-            _logger.LogDebug("Turning on lights by motion sensor {Sensor}", e.Entity.EntityId);
-            switch (_config.NightMode)
-            {
-                case { IsEnabled: true, IsWorkingHours: true }:
-                    foreach (var fsm in LightsOffByAutomation)
-                    {
-                        _lightParameters[fsm.Light.EntityId] = fsm.Light.GetLightParameters() ?? new LightParameters
-                        {
-                            BrightnessPct = 100
-                        };
-                        fsm.Light.TurnOn(_config.NightMode.LightParameters);
-                    }
-                    break;
-                case { IsEnabled: true, IsWorkingHours: false }:
-                    if (_lightParameters.Count > 0)
-                    {
-                        // Restore light parameters before night mode
-                        foreach (var fsm in LightsOffByAutomation)
-                            fsm.Light.TurnOn(_lightParameters[fsm.Light.EntityId]);
-                        _lightParameters = new Dictionary<string, LightParameters>();
-                    }
-                    else
-                    {
-                        LightsOffByAutomation.Select(fsm => fsm.Light).TurnOn();
-                    }
-                    break;
-                case { IsEnabled: false}:
-                    LightsOffByAutomation.Select(fsm => fsm.Light).TurnOn();
-                    break;
-                default:
-                    break;
-            }
-        }
-        else
             _logger.LogDebug("Turning on lights by motion sensor {Sensor} is not allowed because it's not working hours", e.Entity.EntityId);
+            return;
+        }
+        if (!_config.Conditions.All(c => c.IsTrue()))
+        {
+            _logger.LogDebug("Not all conditions are met to turn on lights by motion sensor {Sensor}", e.Entity.EntityId);
+            return;
+        }   
+        
+        _logger.LogDebug("Turning on lights by motion sensor {Sensor}", e.Entity.EntityId);
+        switch (_config.NightMode)
+        {
+            case { IsEnabled: true, IsWorkingHours: true }:
+                foreach (var fsm in LightsOffByAutomation)
+                {
+                    _lightParameters[fsm.Light.EntityId] = fsm.Light.GetLightParameters() ?? new LightParameters
+                    {
+                        BrightnessPct = 100
+                    };
+                    fsm.Light.TurnOn(_config.NightMode.LightParameters);
+                }
+                break;
+            case { IsEnabled: true, IsWorkingHours: false }:
+                if (_lightParameters.Count > 0)
+                {
+                    // Restore light parameters before night mode
+                    foreach (var fsm in LightsOffByAutomation)
+                        fsm.Light.TurnOn(_lightParameters[fsm.Light.EntityId]);
+                    _lightParameters = new Dictionary<string, LightParameters>();
+                }
+                else
+                {
+                    LightsOffByAutomation.Select(fsm => fsm.Light).TurnOn();
+                }
+                break;
+            case { IsEnabled: false}:
+                LightsOffByAutomation.Select(fsm => fsm.Light).TurnOn();
+                break;
+            default:
+                break;
+        }
     }
 
     private bool IsWorkingHours()
@@ -104,9 +116,7 @@ public class LightAutomation: IAutomation
     private void CreateFsm()
     {
         foreach (var l in _lights)
-        {
             _fsmList.Add(ConfigureFsm(l));
-        }
     }
     
     private void ResetTimerOrDoAction(IFsmBase fsm, TimeSpan time, Action action, Func<bool> resetCondition)
@@ -115,21 +125,14 @@ public class LightAutomation: IAutomation
         if (resetCondition())
         {
             fsm.Timer.StartTimer(time, () => ResetTimerOrDoAction(fsm, time, action, resetCondition));
+            return;
         }
-        else
-        {
-            action();
-        }
+        action();
     }
     
     private LightFsmBase ConfigureFsm(ILightEntityCore l)
     {
-        var lightFsm = new LightFsmBase(
-            l, 
-            () => _config.Conditions.All(c => c.IsTrue()),
-            _config,
-            _logger
-            );
+        var lightFsm = new LightFsmBase(l, _config, _logger);
         
         AutomationOn(l.EntityId)
             .Subscribe(e =>

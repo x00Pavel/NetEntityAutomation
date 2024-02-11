@@ -10,9 +10,9 @@ namespace NetEntityAutomation.Room.Core;
 public class RoomManager: IRoomManager
 {   
     private readonly ILogger _logger;
-    private readonly List<Room> _rooms;
+    private List<Room> _rooms = [];
  
-    public RoomManager(IHaContext haContext, ILogger logger, IEnumerable<IRoomConfigV1> rooms)
+    public RoomManager(IHaContext haContext, ILogger<RoomManager> logger, IEnumerable<IRoomConfigV1> rooms)
     {
         _logger = logger;
         _rooms = new List<Room>();

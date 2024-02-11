@@ -46,7 +46,7 @@ public class LightFsmBase : IFsmBase
     
     protected record JsonStorageSchema(LightState State);
     
-    public LightFsmBase(ILightEntityCore light, Func<bool> sensorConditions, AutomationConfig config, ILogger logger)
+    public LightFsmBase(ILightEntityCore light, AutomationConfig config, ILogger logger)
     {
         Config = config;
         Light = light;
@@ -62,7 +62,7 @@ public class LightFsmBase : IFsmBase
             .PermitReentry(LightTrigger.MotionOffTrigger)
             .PermitReentry(LightTrigger.SwitchOffTrigger)
             .PermitReentry(LightTrigger.AllOff)
-            .PermitIf(LightTrigger.MotionOnTrigger, LightState.OnByMotion, sensorConditions)
+            .Permit(LightTrigger.MotionOnTrigger, LightState.OnByMotion)
             .Permit(LightTrigger.SwitchOnTrigger, LightState.OnBySwitch);
         
         _fsm.Configure(LightState.OnByMotion)
