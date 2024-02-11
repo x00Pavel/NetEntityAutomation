@@ -90,10 +90,12 @@ public class LightAutomation: IAutomation
             case { IsEnabled: true, IsWorkingHours: false }:
                 if (_lightParameters.Count > 0)
                 {
-                    // Restore light parameters before night mode
+                    // Restore light parameters after night mode
                     foreach (var fsm in LightsOffByAutomation)
+                    {
                         fsm.Light.TurnOn(_lightParameters[fsm.Light.EntityId]);
-                    _lightParameters = new Dictionary<string, LightParameters>();
+                        _lightParameters.Remove(fsm.Light.EntityId);
+                    }
                 }
                 else
                 {
