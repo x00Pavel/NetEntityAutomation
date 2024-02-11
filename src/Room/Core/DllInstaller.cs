@@ -10,9 +10,10 @@ public static class DllInstaller
     {   
         Console.WriteLine(Assembly.GetCallingAssembly().FullName);
         serviceCollection.Scan(selector =>
-                selector.FromCallingAssembly()
+                // Entry assembly is ND app in this case.
+                selector.FromEntryAssembly()
                     .AddClasses(
-                        classSelector => classSelector.AssignableTo(typeof(IRoomConfigV1))
+                        classSelector => classSelector.AssignableTo<IRoomConfigV1>()
                     )
                     .UsingRegistrationStrategy(RegistrationStrategy.Append)
                     .AsImplementedInterfaces()
