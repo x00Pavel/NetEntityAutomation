@@ -15,7 +15,6 @@
 
     <ItemGroup>
       <ProjectReference Include="..\..\Extensions\Events\Events.csproj" />
-      <ProjectReference Include="..\..\FSM\LightFsm\LightFsm.csproj" />
     </ItemGroup>
 
     <ItemGroup>

@@ -5,7 +5,7 @@ public interface ICondition
     public bool IsTrue();
 }
 
-public class DefaultCondition: ICondition
+public class DefaultCondition : ICondition
 {
     public bool IsTrue() => true;
 }

@@ -1,9 +1,6 @@
 using Microsoft.Extensions.Logging;
 using NetDaemon.HassModel.Entities;
 using NetEntityAutomation.Extensions.Events;
-using NetEntityAutomation.FSM.LightFsm;
-using Newtonsoft.Json;
-using Stateless;
 
 namespace NetEntityAutomation.Room.Core;
 
@@ -36,26 +33,17 @@ public static class LightFsmBaseExtensionMethods
     }
 }
 
-public class LightFsmBase : IFsmBase
+public class LightFsmBase : IFsmBase<LightState, LightTrigger>
 {
-    private StateMachine<LightState, LightTrigger> _fsm;
     public ILightEntityCore Light { get; set; }
-    public LightState State => _fsm.State;
-    private AutomationConfig Config { get; set;}
-    private ILogger Logger { get; set; }
-    
-    protected record JsonStorageSchema(LightState State);
-    
-    public LightFsmBase(ILightEntityCore light, AutomationConfig config, ILogger logger)
+
+    public LightFsmBase(ILightEntityCore light, AutomationConfig config, ILogger logger) : base(config, logger)
     {
-        Config = config;
         Light = light;
-        Logger = logger;
         StoragePath = $"storage/v1/{light.EntityId}_fsm.json";
         Timer = new CustomTimer(logger);
-        // _fsm = new StateMachine<LightState, LightTrigger>(LightState.Off);
-        _fsm = new StateMachine<LightState, LightTrigger>(GetStateFromStorage, StoreState);
-        
+        CreateFsm();
+
         _fsm.Configure(LightState.Off)
             .OnEntry(Timer.Dispose)
             .Ignore(LightTrigger.TimerElapsed)
@@ -64,7 +52,7 @@ public class LightFsmBase : IFsmBase
             .PermitReentry(LightTrigger.AllOff)
             .Permit(LightTrigger.MotionOnTrigger, LightState.OnByMotion)
             .Permit(LightTrigger.SwitchOnTrigger, LightState.OnBySwitch);
-        
+
         _fsm.Configure(LightState.OnByMotion)
             .OnExit(Timer.Dispose)
             .PermitReentry(LightTrigger.MotionOnTrigger)
@@ -73,7 +61,7 @@ public class LightFsmBase : IFsmBase
             .Permit(LightTrigger.TimerElapsed, LightState.Off)
             .Permit(LightTrigger.SwitchOnTrigger, LightState.OnBySwitch)
             .Permit(LightTrigger.SwitchOffTrigger, LightState.OffBySwitch);
-        
+
         _fsm.Configure(LightState.OnBySwitch)
             .OnExit(Timer.Dispose)
             .PermitReentry(LightTrigger.SwitchOnTrigger)
@@ -82,7 +70,7 @@ public class LightFsmBase : IFsmBase
             .PermitReentry(LightTrigger.MotionOnTrigger)
             .Permit(LightTrigger.TimerElapsed, LightState.Off)
             .Permit(LightTrigger.SwitchOffTrigger, LightState.OffBySwitch);
-        
+
         _fsm.Configure(LightState.OffBySwitch)
             .OnExit(Timer.Dispose)
             .PermitReentry(LightTrigger.SwitchOffTrigger)
@@ -91,37 +79,6 @@ public class LightFsmBase : IFsmBase
             .Ignore(LightTrigger.TimerElapsed)
             .Permit(LightTrigger.SwitchOnTrigger, LightState.OnBySwitch)
             .Permit(LightTrigger.AllOff, LightState.Off);
-    }
-    
-    private void StoreState(LightState state)
-    {
-        Logger.LogDebug("Storing state in storage ({Path}) {State}", StoragePath, state);
-        File.WriteAllText(StoragePath, "{\"State\": " + JsonConvert.SerializeObject(state) + "}");
-    }
-    
-    private LightState GetStateFromStorage()
-    {   
-        Logger.LogInformation("Getting state from storage ({Path})", StoragePath);
-        if (!File.Exists(StoragePath))
-        {
-            Logger.LogDebug("Storage file does not exist, creating new one");
-            File.Create(StoragePath).Dispose();
-            return LightState.Off;
-        }
-        var content = File.ReadAllText(StoragePath);
-        var jsonContent = JsonConvert.DeserializeObject<JsonStorageSchema>(content);
-        if (jsonContent != null)
-        {
-            Logger.LogDebug("Storage file content: {Content}", jsonContent);
-            return jsonContent.State;
-        }
-        Logger.LogError("Could not deserialize storage file content");
-        return LightState.Off;
-    }
-    
-    protected override void ConfigureFsm()
-    {
-        throw new NotImplementedException();
     }
 
     public void FireMotionOff()
@@ -134,12 +91,12 @@ public class LightFsmBase : IFsmBase
         _fsm.Fire(LightTrigger.MotionOnTrigger);
     }
 
-    public override void FireOn()
+    public void FireOn()
     {
         _fsm.Fire(LightTrigger.SwitchOnTrigger);
     }
 
-    public override void FireOff()
+    public void FireOff()
     {
         _fsm.Fire(LightTrigger.SwitchOffTrigger);
     }
@@ -148,7 +105,7 @@ public class LightFsmBase : IFsmBase
     {
         _fsm.Fire(LightTrigger.AllOff);
     }
-    
+
     public void FireTimerElapsed()
     {
         _fsm.Fire(LightTrigger.TimerElapsed);

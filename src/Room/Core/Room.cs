@@ -2,16 +2,18 @@ using Microsoft.Extensions.Logging;
 using NetDaemon.HassModel;
 
 namespace NetEntityAutomation.Room.Core;
+
 /// <summary>
 /// This class is responsible for managing all automation in a room.
 /// </summary>
 public class Room
-{   
+{
     private readonly IHaContext _haContext;
     private readonly IRoomConfigV1 _roomConfig;
     private readonly List<AutomationBase> _automations = [];
+
     public Room(IRoomConfigV1 roomConfig, IHaContext haContext)
-    {   
+    {
         _roomConfig = roomConfig;
         _roomConfig.Logger.LogDebug("Creating room {RoomName}", roomConfig.Name);
         _haContext = haContext;
@@ -19,10 +21,10 @@ public class Room
     }
 
     private void InitAutomations()
-    {   
+    {
         _roomConfig.Logger.LogDebug("Creating automations");
         foreach (var automation in _roomConfig.Entities)
-        {   
+        {
             switch (automation.AutomationType)
             {
                 case AutomationType.MainLight:
@@ -39,7 +41,7 @@ public class Room
                     break;
             }
         }
-        
+
         _roomConfig.Logger.LogDebug("Number of automations: {AutomationCount}", _automations.Count);
     }
 }

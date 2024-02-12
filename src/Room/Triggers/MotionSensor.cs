@@ -15,11 +15,12 @@ public class MotionSensor(IEnumerable<IBinarySensorEntityCore> sensors, IHaConte
 
     public IObservable<StateChange> On => TriggerEvent.Where(e => e.New.IsOn());
     public IObservable<StateChange> Off => TriggerEvent.Where(e => e.New.IsOff());
-    
-    public MotionSensor(IBinarySensorEntityCore sensor, IHaContext context) : this(new List<IBinarySensorEntityCore> { sensor }, context)
+
+    public MotionSensor(IBinarySensorEntityCore sensor, IHaContext context) : this(
+        new List<IBinarySensorEntityCore> { sensor }, context)
     {
     }
-    
+
     public bool IsOn() => Sensors.Any(s => HaContext.GetState(s.EntityId)?.State == "on");
     public bool IsOff() => Sensors.Any(s => HaContext.GetState(s.EntityId)?.State == "off");
 }
