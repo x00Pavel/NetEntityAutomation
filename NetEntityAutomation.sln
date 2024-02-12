@@ -10,7 +10,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Automations", "src\Automati
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Debug", "Debug", "{3548B713-C3AF-4D51-863B-CA16A919E5B1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NetEntityAutomation.Extensions.LightExtensionMethods", "src\Extensions\LightExtensionMethods\LightExtensionMethods.csproj", "{B2045A58-5891-4D95-833D-B53D6CCFB5D2}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExtensionMethods", "src\Extensions\ExtensionMethods\ExtensionMethods.csproj", "{B2045A58-5891-4D95-833D-B53D6CCFB5D2}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NetEntityAutomation.Extensions.Events", "src\Extensions\Events\Events.csproj", "{814D8335-4E18-4B53-912C-C4FF1F5234D5}"
 EndProject

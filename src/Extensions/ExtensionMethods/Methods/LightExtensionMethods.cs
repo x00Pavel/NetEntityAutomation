@@ -1,8 +1,7 @@
-﻿using System.Text.Json.Serialization;
-using NetDaemon.HassModel.Entities;
+﻿using NetDaemon.HassModel.Entities;
 using Newtonsoft.Json;
 
-namespace NetEntityAutomation.Extensions.LightExtensionMethods;
+namespace NetEntityAutomation.Extensions.ExtensionMethods;
 
 public static class LightExtensionMethods
 {

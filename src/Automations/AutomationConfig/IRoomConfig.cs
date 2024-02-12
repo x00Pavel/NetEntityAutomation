@@ -4,10 +4,9 @@ namespace NetEntityAutomation.Automations.AutomationConfig;
 
 /// <summary>
 /// Empty interface to allow configuration classes to be added to DI container
-/// </summary>
-public interface IRoom;
+/// </summary >
 
-public interface IRoomConfig<TFsmState>: IRoom where TFsmState : Enum
+public interface IRoomConfig<TFsmState> where TFsmState : Enum
 {
     public string Name { get; }
     public ILogger Logger { get; }

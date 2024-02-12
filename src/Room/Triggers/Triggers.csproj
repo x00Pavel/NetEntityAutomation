@@ -18,4 +18,10 @@
       <ProjectReference Include="..\..\FSM\LightFsm\LightFsm.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Reference Include="NetEntityAutomation.FSM.LightFsm">
+        <HintPath>..\..\FSM\FSM\bin\Debug\net8.0\NetEntityAutomation.FSM.LightFsm.dll</HintPath>
+      </Reference>
+    </ItemGroup>
+
 </Project>

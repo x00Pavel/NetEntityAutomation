@@ -8,19 +8,16 @@ namespace NetEntityAutomation.Room.Core;
 /// Main purpose of this service is to create all the rooms.
 /// </summary>
 public class RoomManager: IRoomManager
-{   
-    private readonly ILogger _logger;
-    private List<Room> _rooms = [];
+{
+    private readonly List<Room> _rooms = [];
  
     public RoomManager(IHaContext haContext, ILogger<RoomManager> logger, IEnumerable<IRoomConfigV1> rooms)
     {
-        _logger = logger;
-        _rooms = new List<Room>();
-        _logger.LogInformation("Initialising room manager");
-        _logger.LogInformation("Number of rooms: {RoomCount}", rooms.Count());
+        logger.LogInformation("Initialising room manager");
+        logger.LogInformation("Number of rooms: {RoomCount}", rooms.Count());
         if (haContext == null)
         {
-            _logger.LogError("HaContext is null");
+            logger.LogError("HaContext is null");
             throw new ArgumentNullException(nameof(haContext));
         }
         

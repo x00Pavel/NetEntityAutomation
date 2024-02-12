@@ -1,10 +1,9 @@
 using NetDaemon.HassModel.Entities;
-using NetEntityAutomation.Automations.AutomationConfig;
-using NetEntityAutomation.Extensions.LightExtensionMethods;
+using NetEntityAutomation.Extensions.ExtensionMethods;
 
-namespace NetEntityAutomation.FSM.LightFsm;
+namespace NetEntityAutomation.Room.Core;
 
-public record NightModeConfig: INightModeConfig
+public record NightModeConfig
 {
     public bool IsEnabled { get; set; } = false;
     public List<ILightEntityCore>? Devices { get; init; }

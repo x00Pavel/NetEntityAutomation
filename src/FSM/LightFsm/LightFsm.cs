@@ -1,6 +1,5 @@
 using Microsoft.Extensions.Logging;
 using NetEntityAutomation.Automations.AutomationConfig;
-using NetEntityAutomation.Extensions.LightExtensionMethods;
 
 namespace NetEntityAutomation.FSM.LightFsm;
 

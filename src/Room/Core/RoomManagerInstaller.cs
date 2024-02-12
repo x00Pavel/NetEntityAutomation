@@ -4,7 +4,7 @@ using Scrutor;
 
 namespace NetEntityAutomation.Room.Core;
 
-public static class DllInstaller
+public static class RoomManagerInstaller
 {
     public static IServiceCollection AddRoomManager(this IServiceCollection serviceCollection)
     {   

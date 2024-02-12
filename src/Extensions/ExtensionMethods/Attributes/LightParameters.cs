@@ -1,6 +1,6 @@
 using System.Text.Json.Serialization;
 
-namespace NetEntityAutomation.Extensions.LightExtensionMethods;
+namespace NetEntityAutomation.Extensions.ExtensionMethods;
 
 public record LightParameters
 {

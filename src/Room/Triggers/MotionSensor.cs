@@ -5,7 +5,7 @@ using NetDaemon.HassModel.Entities;
 namespace NetEntityAutomation.Room.Triggers;
 
 public class MotionSensor(IEnumerable<IBinarySensorEntityCore> sensors, IHaContext context)
-    : ITriggerBase<StateChange>
+    : IStateChangeTrigger
 {
     public IHaContext HaContext { get; set; } = context;
     private IEnumerable<IBinarySensorEntityCore> Sensors { get; } = sensors;

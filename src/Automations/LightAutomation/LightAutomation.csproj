@@ -14,12 +14,25 @@
     <ItemGroup>
         <ProjectReference Include="..\..\Extensions\Events\Events.csproj"/>
         <ProjectReference Include="..\..\FSM\LightFsm\LightFsm.csproj"/>
-        <ProjectReference Include="..\..\Extensions\LightExtensionMethods\LightExtensionMethods.csproj"/>
+        <ProjectReference Include="..\..\Extensions\ExtensionMethods\ExtensionMethods.csproj" />
         <ProjectReference Include="..\AutomationConfig\AutomationConfig.csproj" />
     </ItemGroup>
 
     <ItemGroup>
       <PackageReference Include="NetDaemon.HassModel.Integration" Version="24.3.1" />
     </ItemGroup>
+
+    <ItemGroup>
+      <Reference Include="NetEntityAutomation.FSM.LightFsm">
+        <HintPath>..\..\FSM\FSM\bin\Debug\net8.0\NetEntityAutomation.FSM.LightFsm.dll</HintPath>
+      </Reference>
+    </ItemGroup>
+
+    <ItemGroup>
+      <Reference Include="NetEntityAutomation.FSM.LightFsm">
+        <HintPath>..\..\FSM\FSM\bin\Debug\net8.0\NetEntityAutomation.FSM.LightFsm.dll</HintPath>
+      </Reference>
+    </ItemGroup>
+    
 
 </Project>

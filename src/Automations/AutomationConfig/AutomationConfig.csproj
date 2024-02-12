@@ -14,7 +14,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\..\Extensions\LightExtensionMethods\LightExtensionMethods.csproj" />
+      <ProjectReference Include="..\..\Extensions\ExtensionMethods\ExtensionMethods.csproj" />
     </ItemGroup>
 
 </Project>

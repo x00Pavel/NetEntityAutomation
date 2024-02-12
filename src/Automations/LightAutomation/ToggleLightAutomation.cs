@@ -2,7 +2,7 @@ using System.Reactive.Linq;
 using Microsoft.Extensions.Logging;
 using NetDaemon.HassModel;
 using NetEntityAutomation.Automations.AutomationConfig;
-using NetEntityAutomation.Extensions.LightExtensionMethods;
+using NetEntityAutomation.Extensions.ExtensionMethods;
 using NetEntityAutomation.FSM.LightFsm;
 
 namespace NetEntityAutomation.Automations.LightAutomation;

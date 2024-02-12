@@ -1,5 +1,5 @@
 using NetDaemon.HassModel.Entities;
-using NetEntityAutomation.Extensions.LightExtensionMethods;
+using NetEntityAutomation.Extensions.ExtensionMethods;
 
 namespace NetEntityAutomation.Automations.AutomationConfig;
 

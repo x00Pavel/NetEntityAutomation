@@ -1,4 +1,4 @@
-namespace NetEntityAutomation.Room.Interfaces;
+namespace NetEntityAutomation.Room.Core;
 
 public enum AutomationType
 {

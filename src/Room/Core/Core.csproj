@@ -13,7 +13,6 @@
 
     <ItemGroup>
       <ProjectReference Include="..\..\FSM\LightFsm\LightFsm.csproj" />
-      <ProjectReference Include="..\..\FSM\LightFsm\LightFsm.csproj" />
       <ProjectReference Include="..\Conditions\Conditions.csproj" />
       <ProjectReference Include="..\Triggers\Triggers.csproj" />
     </ItemGroup>

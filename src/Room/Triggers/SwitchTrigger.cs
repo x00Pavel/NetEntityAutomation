@@ -14,6 +14,16 @@ public class SwitchTriggerBase(IEnumerable<string> switchIds): ITriggerBase<ZhaE
 
     public IObservable<ZhaEventData> On => TriggerEvent.Where(e => e.Command == "on");
     public IObservable<ZhaEventData>? Off => TriggerEvent.Where(e => e.Command == "off");
+    public bool IsOn()
+    {
+        throw new NotImplementedException();
+    }
+
+    public bool IsOff()
+    {
+        throw new NotImplementedException();
+    }
+
     public IHaContext? HaContext { get; set; }
     
     public void ConfigureFsmTransition(IFsmBase fsm)

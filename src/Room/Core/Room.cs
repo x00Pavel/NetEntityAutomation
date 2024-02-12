@@ -1,6 +1,5 @@
 using Microsoft.Extensions.Logging;
 using NetDaemon.HassModel;
-using NetEntityAutomation.Room.Interfaces;
 
 namespace NetEntityAutomation.Room.Core;
 /// <summary>
@@ -10,13 +9,12 @@ public class Room
 {   
     private readonly IHaContext _haContext;
     private readonly IRoomConfigV1 _roomConfig;
-    private IEnumerable<IAutomation> _automations;
+    private readonly List<AutomationBase> _automations = [];
     public Room(IRoomConfigV1 roomConfig, IHaContext haContext)
     {   
         _roomConfig = roomConfig;
         _roomConfig.Logger.LogDebug("Creating room {RoomName}", roomConfig.Name);
         _haContext = haContext;
-        _automations = new List<IAutomation>();
         InitAutomations();
     }
 
@@ -30,16 +28,18 @@ public class Room
                 case AutomationType.MainLight:
                     break;
                 case AutomationType.SecondaryLight:
-                    _automations = _automations.Append(new LightAutomation(_haContext, automation, _roomConfig.Logger));
+                    _automations.Add(new LightAutomationBase(_haContext, automation, _roomConfig.Logger));
                     _roomConfig.Logger.LogDebug("Created SecondaryLight");
                     break;
                 case AutomationType.Blinds:
+                    _automations.Add(new BlindAutomationBase(_haContext, automation, _roomConfig.Logger));
+                    _roomConfig.Logger.LogDebug("Created Blinds automation");
                     break;
                 default:
                     break;
             }
         }
         
-        _roomConfig.Logger.LogDebug("Number of automations: {AutomationCount}", _automations.Count());
+        _roomConfig.Logger.LogDebug("Number of automations: {AutomationCount}", _automations.Count);
     }
 }

@@ -4,11 +4,11 @@
         <TargetFramework>net8.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
-        <RootNamespace>NetEntityAutomation.Extensions.LightExtensionMethods</RootNamespace>
+        <RootNamespace>NetEntityAutomation.Extensions.ExtensionMethods</RootNamespace>
+        <AssemblyName>NetEntityAutomation.Extensions.ExtensionMethods</AssemblyName>
         <Authors>Pavel Yadlouski</Authors>
         <PackageProjectUrl>https://github.com/x00Pavel/NetEntityAutomation</PackageProjectUrl>
         <RepositoryUrl>https://github.com/x00Pavel/NetEntityAutomation</RepositoryUrl>
-        <AssemblyName>NetEntityAutomation.Extensions.LightExtensionMethods</AssemblyName>
     </PropertyGroup>
 
     <ItemGroup>

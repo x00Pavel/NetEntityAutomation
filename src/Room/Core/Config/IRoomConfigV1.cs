@@ -1,9 +1,8 @@
 using Microsoft.Extensions.Logging;
-using NetEntityAutomation.Automations.AutomationConfig;
-using NetEntityAutomation.FSM.LightFsm;
 
 namespace NetEntityAutomation.Room.Core;
 
+public interface IRoom;
 
 public interface IRoomConfigV1: IRoom
 {

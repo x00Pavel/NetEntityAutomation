@@ -19,5 +19,13 @@ public class ZigbeeButton(IHaContext context, string deviceIeee): IEntityCore, I
 
     public IObservable<ZhaEventData> On => TriggerEvent.Where(e => e.Command == onCmd);
     public IObservable<ZhaEventData> Off => TriggerEvent.Where(e => e.Command == offCmd);
+    public bool IsOn()
+    {
+        throw new NotImplementedException();
+    }
 
+    public bool IsOff()
+    {
+        throw new NotImplementedException();
+    }
 }

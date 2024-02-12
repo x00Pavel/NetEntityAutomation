@@ -46,3 +46,7 @@ public abstract class LightAutomation<TFsmState>(
     private IObservable<StateChange> AutomationOff(string id) => AutomationEvent(id)
         .Where(e => e.New?.State == "off");
 }
+
+public class HaContext
+{
+}

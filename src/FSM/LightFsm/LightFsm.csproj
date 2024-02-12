@@ -20,7 +20,7 @@
     <ItemGroup>
         <ProjectReference Include="..\..\Automations\AutomationConfig\AutomationConfig.csproj" />
         <ProjectReference Include="..\..\Extensions\Events\Events.csproj" />
-        <ProjectReference Include="..\..\Extensions\LightExtensionMethods\LightExtensionMethods.csproj"/>
+        <ProjectReference Include="..\..\Extensions\ExtensionMethods\ExtensionMethods.csproj" />
     </ItemGroup>
 
 </Project>
