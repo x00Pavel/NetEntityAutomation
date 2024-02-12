@@ -40,6 +40,7 @@ public class LightFsmBase : IFsmBase<LightState, LightTrigger>
 
     public LightFsmBase(ILightEntityCore light, AutomationConfig config, ILogger logger) : base(config, logger)
     {
+        Logger = logger;
         Light = light;
         StoragePath = $"storage/v1/{light.EntityId}_fsm.json";
         Timer = new CustomTimer(logger);

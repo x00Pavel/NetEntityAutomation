@@ -20,6 +20,7 @@ public class BlindsFsm : IFsmBase<LightState, BlindsTrigger>
 
     public BlindsFsm(AutomationConfig config, ILogger logger) : base(config, logger)
     {
+        Logger = logger;
         CreateFsm();
     }
     

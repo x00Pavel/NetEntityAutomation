@@ -22,7 +22,6 @@ public abstract class IFsmBase<TState, TTrigger>{
     {
         Config = config;
         Logger = logger;
-        
     }
 
     protected void CreateFsm()

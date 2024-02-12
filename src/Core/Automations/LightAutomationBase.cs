@@ -12,9 +12,6 @@ namespace NetEntityAutomation.Core.Automations;
 public class LightAutomationBase : AutomationBase
 {
     private readonly IEnumerable<ILightEntityCore> _lights;
-    public IHaContext Context { get; set; }
-    public ILogger Logger { get; set; }
-    public AutomationConfig Config { get; set; }
     private readonly List<LightFsmBase> _fsmList = [];
     private int OnLights => _lights.Count(l => Context.GetState(l.EntityId)?.State == "on");
 
