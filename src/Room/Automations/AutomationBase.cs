@@ -1,8 +1,9 @@
 using System.Reactive.Linq;
 using Microsoft.Extensions.Logging;
 using NetDaemon.HassModel;
+using NetEntityAutomation.Room.Core;
 
-namespace NetEntityAutomation.Room.Core;
+namespace NetEntityAutomation.Room.Automations;
 
 internal enum ServiceAction
 {

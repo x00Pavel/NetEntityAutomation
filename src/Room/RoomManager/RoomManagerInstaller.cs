@@ -1,8 +1,9 @@
 using System.Reflection;
 using Microsoft.Extensions.DependencyInjection;
+using NetEntityAutomation.Room.Core;
 using Scrutor;
 
-namespace NetEntityAutomation.Room.Core;
+namespace NetEntityAutomation.Room.RoomManager;
 
 public static class RoomManagerInstaller
 {
@@ -19,7 +20,7 @@ public static class RoomManagerInstaller
                     .AsImplementedInterfaces()
             )
             // Scoped lifetime for RoomManager is used because IHAContext is scoped
-            .AddScoped<IRoomManager, RoomManager>();
+            .AddScoped<IRoomManager, NetEntityAutomation.Room.RoomManager.RoomManager>();
         return serviceCollection;
     }
 }

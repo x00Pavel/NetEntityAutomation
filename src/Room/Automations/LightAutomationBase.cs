@@ -4,8 +4,9 @@ using NetDaemon.HassModel;
 using NetDaemon.HassModel.Entities;
 using NetEntityAutomation.Extensions.Events;
 using NetEntityAutomation.Extensions.ExtensionMethods;
+using NetEntityAutomation.Room.Core;
 
-namespace NetEntityAutomation.Room.Core;
+namespace NetEntityAutomation.Room.Automations;
 
 public class LightAutomationBase : AutomationBase
 {

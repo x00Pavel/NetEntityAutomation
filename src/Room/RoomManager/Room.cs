@@ -1,7 +1,9 @@
 using Microsoft.Extensions.Logging;
 using NetDaemon.HassModel;
+using NetEntityAutomation.Room.Automations;
+using NetEntityAutomation.Room.Core;
 
-namespace NetEntityAutomation.Room.Core;
+namespace NetEntityAutomation.Room.RoomManager;
 
 /// <summary>
 /// This class is responsible for managing all automation in a room.
