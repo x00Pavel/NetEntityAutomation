@@ -1,0 +1,29 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net8.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <RootNamespace>NetEntityAutomation.Core.RoomManager</RootNamespace>
+        <AssemblyName>NetEntityAutomation.Core.RoomManager</AssemblyName>
+        <Authors>Pavel Yadlouski</Authors>
+        <PackageProjectUrl>https://github.com/x00Pavel/NetEntityAutomation</PackageProjectUrl>
+        <RepositoryUrl>https://github.com/x00Pavel/NetEntityAutomation</RepositoryUrl>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\..\Extensions\ExtensionMethods\ExtensionMethods.csproj" />
+      <ProjectReference Include="..\Automations\Automations.csproj" />
+      <ProjectReference Include="..\Conditions\Conditions.csproj" />
+      <ProjectReference Include="..\Configs\Configs.csproj" />
+      <ProjectReference Include="..\Fsm\Fsm.csproj" />
+      <ProjectReference Include="..\Triggers\Triggers.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="NetDaemon.HassModel.Integration" Version="24.3.1" />
+      <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+      <PackageReference Include="Scrutor" Version="4.2.2" />
+    </ItemGroup>
+
+</Project>
