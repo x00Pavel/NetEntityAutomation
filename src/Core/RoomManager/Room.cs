@@ -12,7 +12,7 @@ public class Room
 {
     private readonly IHaContext _haContext;
     private readonly IRoomConfigV1 _roomConfig;
-    private readonly List<AutomationBase> _automations = [];
+    private readonly List<IAutomationBase> _automations = [];
 
     public Room(IRoomConfigV1 roomConfig, IHaContext haContext)
     {

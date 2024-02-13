@@ -2,33 +2,30 @@ using System.Reactive.Linq;
 using Microsoft.Extensions.Logging;
 using NetDaemon.HassModel;
 using NetDaemon.HassModel.Entities;
-using NetEntityAutomation.Extensions.Events;
-using NetEntityAutomation.Extensions.ExtensionMethods;
 using NetEntityAutomation.Core.Configs;
 using NetEntityAutomation.Core.Fsm;
+using NetEntityAutomation.Extensions.ExtensionMethods;
 
 namespace NetEntityAutomation.Core.Automations;
 
-public class LightAutomationBase : AutomationBase
+public class LightAutomationBase : AutomationBase<ILightEntityCore, LightFsmBase>
 {
-    private readonly IEnumerable<ILightEntityCore> _lights;
-    private readonly List<LightFsmBase> _fsmList = [];
-    private int OnLights => _lights.Count(l => Context.GetState(l.EntityId)?.State == "on");
+    // private readonly List<LightFsmBase> _fsmList = [];
+    private int OnLights => EntitiesList.Count(l => Context.GetState(l.EntityId)?.State == "on");
 
     private IEnumerable<LightFsmBase> LightsOffByAutomation =>
-        _fsmList.Where(fsm => fsm.State != LightState.OffBySwitch);
+        FsmList.Where(fsm => fsm.State != LightState.OffBySwitch);
 
-    private IEnumerable<LightFsmBase> LightOnByAutomation => _fsmList.Where(fsm => fsm.State != LightState.OnBySwitch);
+    private IEnumerable<LightFsmBase> LightOnByAutomation => FsmList.Where(fsm => fsm.State != LightState.OnBySwitch);
     private IDictionary<string, LightParameters> _lightParameters = new Dictionary<string, LightParameters>();
 
-    public LightAutomationBase(IHaContext context, AutomationConfig config, ILogger logger): base(context, logger, config)
+    public LightAutomationBase(IHaContext context, AutomationConfig config, ILogger logger): base(context, config, logger)
     {
-        _lights = config.Entities.OfType<ILightEntityCore>();
         CreateFsm();
-        ConfigureTriggers();
+        ConfigureAutomation();
     }
 
-    private void ConfigureTriggers()
+    private void ConfigureAutomation()
     {
         Logger.LogDebug("Subscribing to motion sensor events");
 
@@ -120,12 +117,6 @@ public class LightAutomationBase : AutomationBase
         return now >= Config.StartAtTimeFunc() || now <= Config.StopAtTimeFunc();
     }
 
-    private void CreateFsm()
-    {
-        foreach (var l in _lights)
-            _fsmList.Add(ConfigureFsm(l));
-    }
-
     private void ResetTimerOrDoAction(LightFsmBase fsm, TimeSpan time, Action action, Func<bool> resetCondition)
     {
         Logger.LogDebug("Resetting timer or doing action {Action} with time {Time}", action.Method.Name, time);
@@ -134,11 +125,10 @@ public class LightAutomationBase : AutomationBase
             fsm.Timer.StartTimer(time, () => ResetTimerOrDoAction(fsm, time, action, resetCondition));
             return;
         }
-
         action();
     }
 
-    private LightFsmBase ConfigureFsm(ILightEntityCore l)
+    protected override LightFsmBase ConfigureFsm(ILightEntityCore l)
     {
         var lightFsm = new LightFsmBase(l, Config, Logger);
 
@@ -157,8 +147,7 @@ public class LightAutomationBase : AutomationBase
             {
                 Logger.LogDebug("Light Event: lights {Light} is in {State} without user by automation {User}",
                     e.New?.EntityId, e.New?.State, e.New?.Context?.UserId);
-                if (OnLights == 0) _fsmList.FireAllOff();
-                else lightFsm.FireMotionOff();
+                ChooseAction(OnLights > 0, lightFsm.FireMotionOff, FsmList.FireAllOff);
             });
 
         UserOn(l.EntityId)
@@ -178,28 +167,18 @@ public class LightAutomationBase : AutomationBase
                         e.New?.EntityId,
                         e.New?.State,
                         e.New?.Context?.UserId);
-                    if (OnLights == 0) _fsmList.FireAllOff();
-                    else lightFsm.FireOff();
+                    ChooseAction(OnLights > 0, lightFsm.FireOff, FsmList.FireAllOff);
                 }
             );
         return lightFsm;
     }
-
-    private IObservable<StateChange> LightEvent(string id) => Context.StateAllChanges()
-        .Where(e => id == e.New?.EntityId);
-
-    private IObservable<StateChange> UserEvent(string id) => LightEvent(id)
-        .Where(e => !e.IsAutomationInitiated(Config.ServiceAccountId));
 
     private IObservable<StateChange> UserOn(string id) => UserEvent(id)
         .Where(e => e.New?.State == "on");
 
     private IObservable<StateChange> UserOff(string id) => UserEvent(id)
         .Where(e => e.New?.State == "off");
-
-    private IObservable<StateChange> AutomationEvent(string id) => LightEvent(id)
-        .Where(e => e.IsAutomationInitiated(Config.ServiceAccountId));
-
+    
     private IObservable<StateChange> AutomationOn(string id) => AutomationEvent(id)
         .Where(e => e.New?.State == "on");
 

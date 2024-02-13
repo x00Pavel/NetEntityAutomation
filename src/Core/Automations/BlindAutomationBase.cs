@@ -1,44 +1,64 @@
+using System.Reactive.Linq;
 using Microsoft.Extensions.Logging;
 using NetDaemon.HassModel;
 using NetDaemon.HassModel.Entities;
 using NetEntityAutomation.Extensions.ExtensionMethods;
 using NetEntityAutomation.Core.Configs;
+using NetEntityAutomation.Core.Fsm;
 
 namespace NetEntityAutomation.Core.Automations;
 
-public class BlindAutomationBase : AutomationBase
+public class BlindAutomationBase : AutomationBase<ICoverEntityCore, BlindsFsm>
 {
-    private ISunEntityCore Sun;
-    private IEnumerable<ICoverEntityCore> Blinds { get; set; }
+    private readonly ISunEntityCore _sun;
+    private int OpenBlinds => EntitiesList.Count(b => Context.GetState(b.EntityId)?.State == "open");
 
-    public BlindAutomationBase(IHaContext haContext, AutomationConfig automation, ILogger roomConfigLogger): base(haContext, roomConfigLogger, automation)
+    public BlindAutomationBase(IHaContext haContext, AutomationConfig automation, ILogger roomConfigLogger): base(haContext, automation, roomConfigLogger)
     {
-        Blinds = Config.Entities.OfType<ICoverEntityCore>() ?? [];
-        Sun = Config.Entities.OfType<ISunEntityCore>().First();
-        var coverEntityCores = Blinds as ICoverEntityCore[] ?? Blinds.ToArray();
+        _sun = Config.Entities.OfType<ISunEntityCore>().First();
+        CreateFsm();
+        ConfigureAutomation();
+    }
+
+    protected override BlindsFsm ConfigureFsm(ICoverEntityCore blind)
+    {   
+        var fsm = new BlindsFsm(Config, Logger, blind);
+        UserClose(blind.EntityId).Subscribe(_ => ChooseAction(OpenBlinds > 0, fsm.FireManualClose, FsmList.FireAllOff));
+        UserOpen(blind.EntityId).Subscribe(_ => fsm.FireManualOpen());
+        AutomationClose(blind.EntityId).Subscribe(_ =>ChooseAction(OpenBlinds > 0, fsm.FireAutomationClose,  fsm.FireAutomationClose));
+        AutomationOpen(blind.EntityId).Subscribe(_ => fsm.FireAutomationOpen());
+        return fsm;
+    }
+
+    private void ConfigureAutomation()
+    {   
+        Logger.LogDebug("Configuring blind automation");
         if (Config.StartAtTimeFunc == null)
         {
-            Sun.AboveHorizon().Subscribe(_ => Blinds.OpenCover());
+            _sun.AboveHorizon().Subscribe(_ => EntitiesList.OpenCover());
             Logger.LogDebug("Subscribed to sun above horizon event to open blinds");
         }
-
         else
         {
             var time = Config.StartAtTimeFunc.Invoke();
-            DailyEventAtTime(time, coverEntityCores.OpenCover);
+            DailyEventAtTime(time, EntitiesList.OpenCover);
             Logger.LogDebug("Subscribed to daily event at {Time} to open blinds", time);
         }
-
-
+        
         if (Config.StopAtTimeFunc == null)
         {
-            Sun.BelowHorizon().Subscribe(_ => Blinds.CloseCover());
-            Logger.LogDebug("Subscribed to sun above horizon event to close blinds");
+            _sun.BelowHorizon().Subscribe(_ => EntitiesList.CloseCover());
+            Logger.LogDebug("Subscribed to sun below horizon event to close blinds");
         }
         else
         {
-            DailyEventAtTime(Config.StopAtTimeFunc.Invoke(), coverEntityCores.CloseCover);
+            DailyEventAtTime(Config.StopAtTimeFunc.Invoke(), EntitiesList.CloseCover);
             Logger.LogDebug("Subscribed to daily event at {Time} to close blinds", Config.StopAtTimeFunc.Invoke());
         }
     }
+    
+    private IObservable<StateChange> UserClose(string id) => UserEvent(id).Where(e => e.New?.State == "closed");
+    private IObservable<StateChange> UserOpen(string id) => UserEvent(id).Where(e => e.New?.State == "open");
+    private IObservable<StateChange> AutomationOpen(string id) => AutomationEvent(id).Where(e => e.New?.State == "open");
+    private IObservable<StateChange> AutomationClose(string id) => AutomationEvent(id).Where(e => e.New?.State == "close");
 }

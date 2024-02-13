@@ -23,18 +23,8 @@ public enum LightTrigger
     AllOff
 }
 
-public static class LightFsmBaseExtensionMethods
-{
-    public static void FireAllOff(this IEnumerable<LightFsmBase> state)
-    {
-        foreach (var fsm in state)
-        {
-            fsm.FireAllOff();
-        }
-    }
-}
 
-public class LightFsmBase : IFsmBase<LightState, LightTrigger>
+public class LightFsmBase : FsmBase<LightState, LightTrigger>
 {
     public ILightEntityCore Light { get; set; }
 
@@ -42,6 +32,7 @@ public class LightFsmBase : IFsmBase<LightState, LightTrigger>
     {
         Logger = logger;
         Light = light;
+        DefaultState = LightState.Off;
         StoragePath = $"storage/v1/{light.EntityId}_fsm.json";
         Timer = new CustomTimer(logger);
         CreateFsm();
@@ -103,7 +94,7 @@ public class LightFsmBase : IFsmBase<LightState, LightTrigger>
         _fsm.Fire(LightTrigger.SwitchOffTrigger);
     }
 
-    public void FireAllOff()
+    public override void FireAllOff()
     {
         _fsm.Fire(LightTrigger.AllOff);
     }

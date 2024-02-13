@@ -1,7 +1,9 @@
 using System.Reactive.Linq;
 using Microsoft.Extensions.Logging;
 using NetDaemon.HassModel;
+using NetDaemon.HassModel.Entities;
 using NetEntityAutomation.Core.Configs;
+using NetEntityAutomation.Extensions.Events;
 
 namespace NetEntityAutomation.Core.Automations;
 
@@ -18,11 +20,17 @@ internal record ServiceData
     public string? value { get; init; }
 }
 
-public abstract class AutomationBase
+public interface IAutomationBase
+{
+}
+
+public abstract class AutomationBase<TEntity, TFsm>: IAutomationBase
 {
     protected IHaContext Context { get; set; }
     protected ILogger Logger { get; set; }
     protected AutomationConfig Config { get; set; }
+    protected IEnumerable<TEntity> EntitiesList { get; set; }
+    protected List<TFsm> FsmList;
     protected IObservable<bool> IsEnabledObserver;
     private bool isEnabled { get; set; } = true;
     public event EventHandler<bool>? IsEnabledChanged;
@@ -36,7 +44,7 @@ public abstract class AutomationBase
             IsEnabledChanged?.Invoke(this, value);
         }
     }
-    protected AutomationBase(IHaContext context, ILogger logger, AutomationConfig config)
+    protected AutomationBase(IHaContext context, AutomationConfig config, ILogger logger)
     {
         Context = context;
         Logger = logger;
@@ -45,6 +53,8 @@ public abstract class AutomationBase
             handler => IsEnabledChanged += handler,
             handler => IsEnabledChanged -= handler
         ).Select(pattern => pattern.EventArgs);
+        FsmList = new List<TFsm>();
+        EntitiesList = Config.Entities.OfType<TEntity>().ToArray() ?? [];
         // InitServices();
     }
 
@@ -58,6 +68,25 @@ public abstract class AutomationBase
         });
         Logger.LogDebug("Triggering first event in {Time}", triggerIn);
     }
+    
+    protected void CreateFsm()
+    {
+        Logger.LogDebug("Configuring {FsmName} ", typeof(TFsm).Name);
+        foreach (var blind in EntitiesList)
+            FsmList.Add(ConfigureFsm(blind));
+    }
+    
+    protected abstract TFsm ConfigureFsm(TEntity entity);
+    
+    private IObservable<StateChange> EntityEvent(string id) => Context.StateAllChanges().Where(e => e.New?.EntityId == id);
+    
+    protected IObservable<StateChange> UserEvent(string id) => EntityEvent(id)
+        .Where(e => !e.IsAutomationInitiated(Config.ServiceAccountId));
+    
+    protected IObservable<StateChange> AutomationEvent(string id) => EntityEvent(id)
+        .Where(e => e.IsAutomationInitiated(Config.ServiceAccountId));
+    
+    protected static void ChooseAction(bool condition, Action action, Action elseAction) => (condition ? action : elseAction)();
     
     // private void InitServices()
     // {

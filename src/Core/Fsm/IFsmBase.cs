@@ -6,23 +6,33 @@ using Stateless;
 
 namespace NetEntityAutomation.Core.Fsm;
 
-public abstract class IFsmBase<TState, TTrigger>{
-    private AutomationConfig Config { get; set; }
+public interface IFsmBase
+{
+    public void FireAllOff();
+}
+
+public static class FsmBaseExtensionMethods
+{
+    public static void FireAllOff(this IEnumerable<IFsmBase> state)
+    {
+        foreach (var fsm in state)
+        {
+            fsm.FireAllOff();
+        }
+    }
+}
+
+public abstract class FsmBase<TState, TTrigger>(AutomationConfig config, ILogger logger): IFsmBase
+{
+    private AutomationConfig Config { get; set; } = config;
     protected StateMachine<TState, TTrigger> _fsm;
-    protected ILogger Logger;
+    protected ILogger Logger = logger;
     public CustomTimer Timer;
     public TState State => _fsm.State;
-    public TState DefaultState { get; init; }
+    protected TState DefaultState;
     protected string StoragePath;
     public bool IsEnabled { get; set; } = true;
-    
-
     protected record JsonStorageSchema(TState State);
-    protected IFsmBase(AutomationConfig config, ILogger logger)
-    {
-        Config = config;
-        Logger = logger;
-    }
 
     protected void CreateFsm()
     {
@@ -42,6 +52,7 @@ public abstract class IFsmBase<TState, TTrigger>{
         {
             Logger.LogDebug("Storage file does not exist, creating new one");
             File.Create(StoragePath).Dispose();
+            File.WriteAllText(StoragePath, "{\"State\": " + JsonConvert.SerializeObject(DefaultState) + "}");
             return DefaultState;
         }
 
@@ -56,4 +67,6 @@ public abstract class IFsmBase<TState, TTrigger>{
         Logger.LogError("Could not deserialize storage file content");
         return DefaultState;
     }
+
+    public abstract void FireAllOff();
 }
