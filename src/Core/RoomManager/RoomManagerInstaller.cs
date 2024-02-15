@@ -14,7 +14,7 @@ public static class RoomManagerInstaller
                 // Entry assembly is ND app in this case.
                 selector.FromEntryAssembly()
                     .AddClasses(
-                        classSelector => classSelector.AssignableTo<IRoomConfigV1>()
+                        classSelector => classSelector.AssignableTo<IRoomConfig>()
                     )
                     .UsingRegistrationStrategy(RegistrationStrategy.Append)
                     .AsImplementedInterfaces()

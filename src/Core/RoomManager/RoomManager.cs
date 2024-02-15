@@ -13,7 +13,7 @@ public class RoomManager : IRoomManager
 {
     private readonly List<Room> _rooms = [];
 
-    public RoomManager(IHaContext haContext, ILogger<RoomManager> logger, IEnumerable<IRoomConfigV1> rooms)
+    public RoomManager(IHaContext haContext, ILogger<RoomManager> logger, IEnumerable<IRoomConfig> rooms)
     {
         logger.LogInformation("Initialising room manager");
         logger.LogInformation("Number of rooms: {RoomCount}", rooms.Count());

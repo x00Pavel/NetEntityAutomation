@@ -4,7 +4,7 @@ namespace NetEntityAutomation.Core.Configs;
 
 public interface IRoom;
 
-public interface IRoomConfigV1 : IRoom
+public interface IRoomConfig : IRoom
 {
     public string Name => GetType().Name;
     public ILogger Logger { get; set; }
