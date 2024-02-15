@@ -1,4 +1,4 @@
-- name: Docs
-  href: Docs/
+- name: Getting Started
+  href: Docs/how-to-use.md
 - name: API
   href: api/
