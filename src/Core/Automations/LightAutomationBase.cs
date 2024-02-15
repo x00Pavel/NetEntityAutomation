@@ -8,9 +8,19 @@ using NetEntityAutomation.Extensions.ExtensionMethods;
 
 namespace NetEntityAutomation.Core.Automations;
 
+/// <summary>
+/// Abstract class for managing light automations.
+/// Scenario and triggers in this class created with secondary light use-case in mind.
+/// <br/>
+/// Scenario:
+/// <list type="bullet">
+///     <item>
+///         <description>Specific lights triggered by the motion sensor in certain time frame specified by <c>StopAtTimeFunc</c> and <c>StartAtTimeFunc</c> callable parameters in the config.</description>
+///     </item>
+/// </list>
+/// </summary>
 public class LightAutomationBase : AutomationBase<ILightEntityCore, LightFsmBase>
 {
-    // private readonly List<LightFsmBase> _fsmList = [];
     private int OnLights => EntitiesList.Count(l => Context.GetState(l.EntityId)?.State == "on");
 
     private IEnumerable<LightFsmBase> LightsOffByAutomation =>
@@ -32,7 +42,6 @@ public class LightAutomationBase : AutomationBase<ILightEntityCore, LightFsmBase
         foreach (var sensor in Config.Triggers)
         {
             sensor.On.Subscribe(TurnOnByAutomation);
-            // sensor.Off.Subscribe(TurnOffByAutomation);
         }
     }
 

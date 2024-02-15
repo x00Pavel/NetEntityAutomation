@@ -4,6 +4,12 @@ using NetDaemon.HassModel.Entities;
 
 namespace NetEntityAutomation.Core.Triggers;
 
+/// <summary>
+/// Class represents a motion sensor.
+/// It can be a single sensor or a group of sensors (e.g. all sensors in a room).
+/// </summary>
+/// <param name="sensors">A set of sensors to be used</param>
+/// <param name="context">Home Assistant context</param>
 public class MotionSensor(IEnumerable<IBinarySensorEntityCore> sensors, IHaContext context)
     : IStateChangeTrigger
 {

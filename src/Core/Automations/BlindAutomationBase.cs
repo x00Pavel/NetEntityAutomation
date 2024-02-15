@@ -8,6 +8,10 @@ using NetEntityAutomation.Core.Fsm;
 
 namespace NetEntityAutomation.Core.Automations;
 
+/// <summary>
+/// Class for managing blinds automations.
+/// Currently it is used for opening and closing blinds based on sun position (default, above horizon or below horizon) or specific time.
+/// </summary>
 public class BlindAutomationBase : AutomationBase<ICoverEntityCore, BlindsFsm>
 {
     private readonly ISunEntityCore _sun;
