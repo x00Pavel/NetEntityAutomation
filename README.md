@@ -1,7 +1,3 @@
----
-_layout: landing
----
-
 # NetEntityAutomation
 
 Project provides several NuGet packages for home automation on open source platform Home Assistant using NetDaemon framework.
