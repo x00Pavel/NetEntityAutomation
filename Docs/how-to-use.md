@@ -10,14 +10,14 @@ To start using automations from this library, you need to:
 1. Create a new NetDaemon project (process of creating a new project is described in [NetDaemon documentation](https://netdaemon.xyz/docs/user/started/development/)).
 2. Install NuGet package [NetEntityAutomation.Core.RoomManager](https://github.com/users/x00Pavel/packages/nuget/package/NetEntityAutomation.Core.RoomManager) in your NetDaemon project.
 3. Create configuration classes. Typically, one class represents a room in your house.
-4. Add RoomManager to Dependency Injection container in your NetDaemon project by calling `AddRoomManager`. This call has to be made **after** all NetDaemon related services are added to the container.
-5. Add RoomManager to any NetDaemon app to instantiate it. RoomManager will use discovered configuration classes to create and manage automations.
+4. Add `RoomManager` to Dependency Injection container in your NetDaemon project by calling `AddRoomManager` in `program.cs`. This call has to be made **after** all NetDaemon related services are added to the container.
+5. Add `RoomManager` to any NetDaemon app as a dependency to instantiate it. `RoomManager` will use discovered configuration classes to create and manage automations.
 
 At this point you should have a working NetDaemon project with automations from NetEntityAutomation library.
 
-## Configuration classes
+## Configuration
 
-Configuration classes are used to define rooms in your house and entities that are present in these rooms.
+Configuration class is used to define rooms and entities that are present in specified room.
 Following example illustrates how to define a room configuration:
 
 ```csharp
