@@ -5,7 +5,6 @@ using NetDaemon.HassModel.Entities;
 using NetEntityAutomation.Extensions.ExtensionMethods;
 using NetEntityAutomation.Core.Configs;
 using NetEntityAutomation.Core.Fsm;
-
 namespace NetEntityAutomation.Core.Automations;
 
 /// <summary>
@@ -24,9 +23,31 @@ public class BlindAutomationBase : AutomationBase<ICoverEntityCore, BlindsFsm>
         ConfigureAutomation();
     }
 
+    private bool IsOpenTime()
+    {
+        return (Config.StartAtTimeFunc == null, Config.StopAtTimeFunc == null) switch
+        {
+            (true, true) => _sun.IsAboveHorizon(),
+            (false, false) => UtilsMethods.NowInTimeRange(Config.StartAtTimeFunc!(), Config.StopAtTimeFunc!()),
+            (true, false) => _sun.IsAboveHorizon() && UtilsMethods.NowAfterTime(Config.StopAtTimeFunc!()),
+            (false, true) => UtilsMethods.NowBeforeTime(Config.StartAtTimeFunc!()) && _sun.IsAboveHorizon(),
+        };
+    }
+    
+    private BlindsStateActivateAction BlindsActivateActions(ICoverEntityCore blind)
+    {
+        return new BlindsStateActivateAction
+        {
+            OpenByAutomationAction = () => ChooseAction(IsOpenTime(), blind.OpenCover, blind.CloseCover),
+            OpenByManualAction = () => ChooseAction(IsOpenTime(), blind.OpenCover, blind.CloseCover),
+            Closed = () => ChooseAction(!IsOpenTime(), blind.CloseCover, blind.OpenCover),
+            CloseManuallyAction = () => ChooseAction(!IsOpenTime(), blind.CloseCover, blind.OpenCover)
+        };
+    }
+    
     protected override BlindsFsm ConfigureFsm(ICoverEntityCore blind)
     {   
-        var fsm = new BlindsFsm(Config, Logger, blind);
+        var fsm = new BlindsFsm(Config, Logger, blind).Configure(BlindsActivateActions(blind));
         UserClose(blind.EntityId).Subscribe(_ => ChooseAction(OpenBlinds > 0, fsm.FireManualClose, FsmList.FireAllOff));
         UserOpen(blind.EntityId).Subscribe(_ => fsm.FireManualOpen());
         AutomationClose(blind.EntityId).Subscribe(_ =>ChooseAction(OpenBlinds > 0, fsm.FireAutomationClose,  fsm.FireAutomationClose));

@@ -42,12 +42,12 @@ public static class LightExtensionMethods
     
     public static void Toggle(this ILightEntityCore target, double? transition = null, long? brightnessPct = null)
     {
-        target.CallService("toggle", new LightParameters { Transition = transition, BrightnessPct = brightnessPct});
+        target.CallService("toggle", new LightParameters { Brightness = brightnessPct});
     }
     
     public static void TurnOn(this IEnumerable<ILightEntityCore> target, double? transition = null, long? brightnessPct = null)
     {
-        target.CallService("turn_on", new LightParameters { Transition = transition, BrightnessPct = brightnessPct});
+        target.CallService("turn_on", new LightParameters { Brightness = brightnessPct});
     }
     
     public static void Toggle(this ILightEntityCore target, LightParameters parameters)
@@ -61,7 +61,7 @@ public static class LightExtensionMethods
     }
     
     public static LightParameters? GetLightParameters(this ILightEntityCore target)
-    {
-        return JsonConvert.DeserializeObject<LightParameters>(target.HaContext.GetState(target.EntityId)?.Attributes?.ToString() ?? "");
+    {   
+        return JsonConvert.DeserializeObject<LightParameters>(target.HaContext.GetState(target.EntityId)?.AttributesJson.ToString() ?? "{}");
     }
 }

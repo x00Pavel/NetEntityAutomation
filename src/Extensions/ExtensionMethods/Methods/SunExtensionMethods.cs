@@ -15,9 +15,19 @@ public static class SunExtensionMethods
         return sun.StateChange().Where(e => e.New?.State == "above_horizon");
     }
     
+    public static bool IsAboveHorizon(this ISunEntityCore sun)
+    {
+        return sun.GetCurrentState()?.State == "above_horizon";
+    }
+    
     public static IObservable<StateChange> BelowHorizon(this ISunEntityCore sun)
     {
         return sun.StateChange().Where(e => e.New?.State == "below_horizon");
+    }
+    
+    public static bool IsBelowHorizon(this ISunEntityCore sun)
+    {
+        return sun.GetCurrentState()?.State == "below_horizon";
     }
     
     public static EntityState? GetCurrentState(this ISunEntityCore sun)

@@ -1,5 +1,5 @@
 - name: Home
-  href: README.md
+  href: index.md
 - name: Getting Started
   href: Docs/how-to-use.md
 - name: API

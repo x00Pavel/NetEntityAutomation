@@ -22,6 +22,14 @@ public enum BlindsState
     CloseManually
 }
 
+public struct BlindsStateActivateAction
+{
+    public Action OpenByAutomationAction { get; init; }
+    public Action OpenByManualAction { get; init; }
+    public Action Closed { get; init; }
+    public Action CloseManuallyAction { get; init; }
+}
+
 public class BlindsFsm : FsmBase<BlindsState, BlindsTrigger>
 {
     private ICoverEntityCore Blinds { get; set; }
@@ -32,38 +40,7 @@ public class BlindsFsm : FsmBase<BlindsState, BlindsTrigger>
         Blinds = blinds;
         DefaultState = BlindsState.Closed;
         StoragePath = $"storage/v1/{Blinds.EntityId}_fsm.json";
-        CreateFsm();
-
-        _fsm.Configure(BlindsState.Closed)
-            .PermitReentry(BlindsTrigger.AllCloseTrigger)
-            .PermitReentry(BlindsTrigger.AutomationCloseTrigger)
-            .Permit(BlindsTrigger.AllOpenTrigger, BlindsState.OpenByAutomation)
-            .Permit(BlindsTrigger.AutomationOpenTrigger, BlindsState.OpenByAutomation)
-            .Permit(BlindsTrigger.ManualOpenTrigger, BlindsState.OpenByManual);
-
-        _fsm.Configure(BlindsState.OpenByAutomation)
-            .Ignore(BlindsTrigger.ManualOpenTrigger)
-            .PermitReentry(BlindsTrigger.AllOpenTrigger)
-            .PermitReentry(BlindsTrigger.AutomationOpenTrigger)
-            .Permit(BlindsTrigger.AllCloseTrigger, BlindsState.Closed)
-            .Permit(BlindsTrigger.AutomationCloseTrigger, BlindsState.Closed)
-            .Permit(BlindsTrigger.ManualCloseTrigger, BlindsState.CloseManually);
-
-        _fsm.Configure(BlindsState.OpenByManual)
-            .PermitReentry(BlindsTrigger.ManualOpenTrigger)
-            .Ignore(BlindsTrigger.AllOpenTrigger)
-            .Ignore(BlindsTrigger.AutomationCloseTrigger)
-            .Ignore(BlindsTrigger.AutomationOpenTrigger)
-            .Permit(BlindsTrigger.ManualCloseTrigger, BlindsState.CloseManually)
-            .Permit(BlindsTrigger.AllCloseTrigger, BlindsState.Closed);
-        
-        _fsm.Configure(BlindsState.CloseManually)
-            .PermitReentry(BlindsTrigger.ManualCloseTrigger)
-            .Ignore(BlindsTrigger.AutomationCloseTrigger)
-            .Ignore(BlindsTrigger.AutomationOpenTrigger)
-            .Ignore(BlindsTrigger.AllOpenTrigger)
-            .Permit(BlindsTrigger.AllCloseTrigger, BlindsState.Closed)
-            .Permit(BlindsTrigger.ManualOpenTrigger, BlindsState.OpenByManual);
+        InitFsm();
     }
     
     public void FireAutomationOpen() => _fsm.Fire(BlindsTrigger.AutomationOpenTrigger);
@@ -73,5 +50,42 @@ public class BlindsFsm : FsmBase<BlindsState, BlindsTrigger>
     public void FireAllOpen() => _fsm.Fire(BlindsTrigger.AllOpenTrigger);
 
     public override void FireAllOff() => _fsm.Fire(BlindsTrigger.AllCloseTrigger);
-    
+    public BlindsFsm Configure(BlindsStateActivateAction blindsStateActions)
+    {
+        _fsm.Configure(BlindsState.Closed)
+            .OnActivate(blindsStateActions.Closed)
+            .PermitReentry(BlindsTrigger.AllCloseTrigger)
+            .PermitReentry(BlindsTrigger.AutomationCloseTrigger)
+            .Permit(BlindsTrigger.AllOpenTrigger, BlindsState.OpenByAutomation)
+            .Permit(BlindsTrigger.AutomationOpenTrigger, BlindsState.OpenByAutomation)
+            .Permit(BlindsTrigger.ManualOpenTrigger, BlindsState.OpenByManual);
+
+        _fsm.Configure(BlindsState.OpenByAutomation)
+            .OnActivate(blindsStateActions.OpenByAutomationAction)
+            .Ignore(BlindsTrigger.ManualOpenTrigger)
+            .PermitReentry(BlindsTrigger.AllOpenTrigger)
+            .PermitReentry(BlindsTrigger.AutomationOpenTrigger)
+            .Permit(BlindsTrigger.AllCloseTrigger, BlindsState.Closed)
+            .Permit(BlindsTrigger.AutomationCloseTrigger, BlindsState.Closed)
+            .Permit(BlindsTrigger.ManualCloseTrigger, BlindsState.CloseManually);
+
+        _fsm.Configure(BlindsState.OpenByManual)
+            .OnActivate(blindsStateActions.OpenByManualAction)
+            .PermitReentry(BlindsTrigger.ManualOpenTrigger)
+            .Ignore(BlindsTrigger.AllOpenTrigger)
+            .Ignore(BlindsTrigger.AutomationCloseTrigger)
+            .Ignore(BlindsTrigger.AutomationOpenTrigger)
+            .Permit(BlindsTrigger.ManualCloseTrigger, BlindsState.CloseManually)
+            .Permit(BlindsTrigger.AllCloseTrigger, BlindsState.Closed);
+        
+        _fsm.Configure(BlindsState.CloseManually)
+            .OnActivate(blindsStateActions.CloseManuallyAction)
+            .PermitReentry(BlindsTrigger.ManualCloseTrigger)
+            .Ignore(BlindsTrigger.AutomationCloseTrigger)
+            .Ignore(BlindsTrigger.AutomationOpenTrigger)
+            .Ignore(BlindsTrigger.AllOpenTrigger)
+            .Permit(BlindsTrigger.AllCloseTrigger, BlindsState.Closed)
+            .Permit(BlindsTrigger.ManualOpenTrigger, BlindsState.OpenByManual);
+        return this;
+    }
 }

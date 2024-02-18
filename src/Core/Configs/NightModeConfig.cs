@@ -15,6 +15,7 @@ public record NightModeConfig
     /// Enable night mode for the automation.
     /// </summary>
     public bool IsEnabled { get; set; } = false;
+    
     /// <summary>
     /// A list of devices that will be used in the night mode.
     /// <remarks>
@@ -22,10 +23,11 @@ public record NightModeConfig
     /// </remarks>
     /// </summary>
     public List<ILightEntityCore>? Devices { get; init; }
+    
     /// <summary>
     /// Light parameters for the night mode to be set on specific devices.
     /// <para>
-    /// Default value is 40% brightness and 2 seconds transition.
+    /// Default value is 40% brightness.
     /// </para>
     /// <remarks>
     /// Currently, it is used on;y for light automations.
@@ -33,8 +35,7 @@ public record NightModeConfig
     /// </summary>
     public LightParameters LightParameters { get; init; } = new()
     {
-        BrightnessPct = 40,
-        Transition = 2
+        Brightness = 255 * 0.4,
     };
     
     /// <summary>
@@ -66,12 +67,5 @@ public record NightModeConfig
     /// Helper method to check if the current time is within the night mode time.
     /// Used in automation code.
     /// </summary>
-    public bool IsWorkingHours
-    {
-        get
-        {
-            var now = DateTime.Now.TimeOfDay;
-            return now >= StartAtTimeFunc() || now <= StopAtTimeFunc();
-        }
-    }
+    public bool IsWorkingHours => UtilsMethods.NowInTimeRange(StartAtTimeFunc(), StopAtTimeFunc());
 }

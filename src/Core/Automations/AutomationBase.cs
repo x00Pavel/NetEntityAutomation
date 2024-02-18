@@ -4,6 +4,7 @@ using NetDaemon.HassModel;
 using NetDaemon.HassModel.Entities;
 using NetEntityAutomation.Core.Configs;
 using NetEntityAutomation.Extensions.Events;
+using NetEntityAutomation.Extensions.ExtensionMethods;
 
 namespace NetEntityAutomation.Core.Automations;
 
@@ -60,6 +61,8 @@ public abstract class AutomationBase<TEntity, TFsm>: IAutomationBase
         FsmList = new List<TFsm>();
         EntitiesList = Config.Entities.OfType<TEntity>().ToArray() ?? [];
         InitServices();
+        Logger.LogDebug("Working hours from {Start} - {End}", Config.StartAtTimeFunc(), Config.StopAtTimeFunc());
+        Logger.LogDebug("Night mode from{Start} - {End}", Config.NightMode.StartAtTimeFunc(), Config.NightMode.StopAtTimeFunc());
     }
 
     /// <summary>
@@ -118,6 +121,12 @@ public abstract class AutomationBase<TEntity, TFsm>: IAutomationBase
     protected IObservable<StateChange> UserEvent(string id) => EntityEvent(id)
         .Where(e => !e.IsAutomationInitiated(Config.ServiceAccountId));
     
+    /// <summary>
+    /// Observable for all state changes of a specific entity initiated by the automation.
+    /// This method uses ServiceAccountId to determine if the state change was initiated by the automation.
+    /// </summary>
+    /// <param name="id">Account ID which owns the token for NetDaemon</param>
+    /// <returns></returns>
     protected IObservable<StateChange> AutomationEvent(string id) => EntityEvent(id)
         .Where(e => e.IsAutomationInitiated(Config.ServiceAccountId));
     
@@ -159,5 +168,13 @@ public abstract class AutomationBase<TEntity, TFsm>: IAutomationBase
     //                     e.action, e.value);
     //             }
     //         });
+    }
+
+    protected bool IsWorkingHours()
+    {
+        if (Config is { StartAtTimeFunc: not null, StopAtTimeFunc: not null })
+            return UtilsMethods.NowInTimeRange(Config.StartAtTimeFunc(), Config.StopAtTimeFunc());
+        Logger.LogWarning("Can't determine working hours. StartAtTimeFunc or StopAtTimeFunc is not set");
+        return true;
     }
 }
