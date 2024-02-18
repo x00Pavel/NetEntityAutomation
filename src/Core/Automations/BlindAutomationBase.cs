@@ -34,16 +34,20 @@ public class BlindAutomationBase : AutomationBase<ICoverEntityCore, BlindsFsm>
         };
     }
     
-    protected override BlindsFsm ConfigureFsm(ICoverEntityCore blind)
-    {   
-        var fsm = new BlindsFsm(Config, Logger, blind);
-        var actions = new BlindsStateActivateAction
+    private BlindsStateActivateAction BlindsActivateActions(ICoverEntityCore blind)
+    {
+        return new BlindsStateActivateAction
         {
             OpenByAutomationAction = () => ChooseAction(IsOpenTime(), blind.OpenCover, blind.CloseCover),
             OpenByManualAction = () => ChooseAction(IsOpenTime(), blind.OpenCover, blind.CloseCover),
             Closed = () => ChooseAction(!IsOpenTime(), blind.CloseCover, blind.OpenCover),
             CloseManuallyAction = () => ChooseAction(!IsOpenTime(), blind.CloseCover, blind.OpenCover)
         };
+    }
+    
+    protected override BlindsFsm ConfigureFsm(ICoverEntityCore blind)
+    {   
+        var fsm = new BlindsFsm(Config, Logger, blind).Configure(BlindsActivateActions(blind));
         UserClose(blind.EntityId).Subscribe(_ => ChooseAction(OpenBlinds > 0, fsm.FireManualClose, FsmList.FireAllOff));
         UserOpen(blind.EntityId).Subscribe(_ => fsm.FireManualOpen());
         AutomationClose(blind.EntityId).Subscribe(_ =>ChooseAction(OpenBlinds > 0, fsm.FireAutomationClose,  fsm.FireAutomationClose));

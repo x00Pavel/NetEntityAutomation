@@ -38,27 +38,6 @@ public class LightAutomationBase : AutomationBase<ILightEntityCore, LightFsmBase
             sensor.On.Subscribe(TurnOnByAutomation);
         }
     }
-
-    private void TurnOffByAutomation(StateChange e)
-    {
-        if (!IsWorkingHours())
-        {
-            Logger.LogDebug(
-                "Turning off lights by motion sensor {Sensor} is not allowed because it's not working hours",
-                e.Entity.EntityId);
-            return;
-        }
-
-        if (!Config.Conditions.All(c => c.IsTrue()))
-        {
-            Logger.LogDebug("Not all conditions are met to turn off lights by motion sensor {Sensor}",
-                e.Entity.EntityId);
-            return;
-        }
-
-        Logger.LogDebug("Turning off lights by motion sensor {Sensor}", e.Entity.EntityId);
-        LightOnByAutomation.Select(fsm => fsm.Light).TurnOff();
-    }
     
     private void TurnOnByAutomation(StateChange e)
     {
@@ -141,20 +120,17 @@ public class LightAutomationBase : AutomationBase<ILightEntityCore, LightFsmBase
     }
 
     private bool OnConditionsMet() => IsWorkingHours() && Config.Triggers.Any(s => s.IsOn()) && Config.Conditions.All(c => c.IsTrue());
-        
-    
-    protected override LightFsmBase ConfigureFsm(ILightEntityCore l)
-    {
 
-        var lightFsm = new LightFsmBase(l, Config, Logger);
-        var stateActions = new LightStateActivateAction
+    private LightStateActivateAction ActionForLight(ILightEntityCore l)
+    {
+        return new LightStateActivateAction
         { 
-            OffAction = () =>
+            OffAction = _ =>
             {
                 Logger.LogDebug("Activating FSM in state Off ");
                 l.TurnOff();
             },
-            OnByMotionAction = () =>
+            OnByMotionAction = lightFsm =>
             {
                 Logger.LogDebug("Activating FSM in state OnByMotion");
                 if (OnConditionsMet())
@@ -167,7 +143,7 @@ public class LightAutomationBase : AutomationBase<ILightEntityCore, LightFsmBase
                     l.TurnOff();
                 }
             },
-            OnBySwitchAction = () => 
+            OnBySwitchAction = lightFsm => 
             {
                 Logger.LogDebug("Activating FSM in state OnBySwitch");  
                 if (OnConditionsMet())
@@ -181,13 +157,17 @@ public class LightAutomationBase : AutomationBase<ILightEntityCore, LightFsmBase
                 }
                 
             },
-            OffBySwitchAction = () =>
+            OffBySwitchAction = _ =>
             {
                 Logger.LogDebug("Activating FSM in state OffBySwitch");
                 l.TurnOff();
             }
         };
-        lightFsm.Configure(stateActions);
+    }
+    
+    protected override LightFsmBase ConfigureFsm(ILightEntityCore l)
+    {
+        var lightFsm = new LightFsmBase(l, Config, Logger).Configure(ActionForLight(l));
         
         AutomationOn(l.EntityId)
             .Subscribe(e =>
