@@ -22,8 +22,14 @@ public enum LightTrigger
     TimerElapsed,
     AllOff
 }
-
-
+public struct LightStateActivateAction
+{
+    public Action OnByMotionAction { get; init; }
+    public Action OnBySwitchAction { get; init; }
+    public Action OffAction { get; init; }
+    public Action OffBySwitchAction { get; init; }
+    
+}
 public class LightFsmBase : FsmBase<LightState, LightTrigger>
 {
     public ILightEntityCore Light { get; set; }
@@ -35,9 +41,13 @@ public class LightFsmBase : FsmBase<LightState, LightTrigger>
         DefaultState = LightState.Off;
         StoragePath = $"storage/v1/{light.EntityId}_fsm.json";
         Timer = new CustomTimer(logger);
-        CreateFsm();
+        InitFsm();
+    }
 
+    public void Configure(LightStateActivateAction lightStateActions)
+    {
         _fsm.Configure(LightState.Off)
+            .OnActivate(lightStateActions.OffAction)
             .OnEntry(Timer.Dispose)
             .Ignore(LightTrigger.TimerElapsed)
             .PermitReentry(LightTrigger.MotionOffTrigger)
@@ -47,6 +57,7 @@ public class LightFsmBase : FsmBase<LightState, LightTrigger>
             .Permit(LightTrigger.SwitchOnTrigger, LightState.OnBySwitch);
 
         _fsm.Configure(LightState.OnByMotion)
+            .OnActivate(lightStateActions.OnByMotionAction)
             .OnExit(Timer.Dispose)
             .PermitReentry(LightTrigger.MotionOnTrigger)
             .Ignore(LightTrigger.MotionOffTrigger)
@@ -56,6 +67,7 @@ public class LightFsmBase : FsmBase<LightState, LightTrigger>
             .Permit(LightTrigger.SwitchOffTrigger, LightState.OffBySwitch);
 
         _fsm.Configure(LightState.OnBySwitch)
+            .OnActivate(lightStateActions.OnBySwitchAction)
             .OnExit(Timer.Dispose)
             .PermitReentry(LightTrigger.SwitchOnTrigger)
             .Ignore(LightTrigger.MotionOffTrigger)
@@ -65,6 +77,7 @@ public class LightFsmBase : FsmBase<LightState, LightTrigger>
             .Permit(LightTrigger.SwitchOffTrigger, LightState.OffBySwitch);
 
         _fsm.Configure(LightState.OffBySwitch)
+            .OnActivate(lightStateActions.OffBySwitchAction)
             .OnExit(Timer.Dispose)
             .PermitReentry(LightTrigger.SwitchOffTrigger)
             .Ignore(LightTrigger.MotionOnTrigger)
@@ -72,6 +85,7 @@ public class LightFsmBase : FsmBase<LightState, LightTrigger>
             .Ignore(LightTrigger.TimerElapsed)
             .Permit(LightTrigger.SwitchOnTrigger, LightState.OnBySwitch)
             .Permit(LightTrigger.AllOff, LightState.Off);
+        _fsm.Activate();
     }
 
     public void FireMotionOff()

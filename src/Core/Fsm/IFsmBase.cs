@@ -34,7 +34,7 @@ public abstract class FsmBase<TState, TTrigger>(AutomationConfig config, ILogger
     public bool IsEnabled { get; set; } = true;
     protected record JsonStorageSchema(TState State);
 
-    protected void CreateFsm()
+    protected void InitFsm()
     {
         _fsm = new StateMachine<TState, TTrigger>(GetStateFromStorage, StoreState);
     }
@@ -47,7 +47,6 @@ public abstract class FsmBase<TState, TTrigger>(AutomationConfig config, ILogger
 
     private TState GetStateFromStorage()
     {
-        Logger.LogInformation("Getting state from storage ({Path})", StoragePath);
         if (!File.Exists(StoragePath))
         {
             Logger.LogDebug("Storage file does not exist, creating new one");
@@ -60,7 +59,7 @@ public abstract class FsmBase<TState, TTrigger>(AutomationConfig config, ILogger
         var jsonContent = JsonConvert.DeserializeObject<JsonStorageSchema>(content);
         if (jsonContent != null)
         {
-            Logger.LogDebug("Storage file content: {Content}", jsonContent);
+            Logger.LogDebug("{Path}: {Content}", StoragePath, jsonContent);
             return jsonContent.State;
         }
 

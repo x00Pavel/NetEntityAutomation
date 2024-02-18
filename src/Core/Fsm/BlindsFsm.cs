@@ -22,6 +22,14 @@ public enum BlindsState
     CloseManually
 }
 
+public struct BlindsStateActivateAction
+{
+    public Action OpenByAutomationAction { get; init; }
+    public Action OpenByManualAction { get; init; }
+    public Action Closed { get; init; }
+    public Action CloseManuallyAction { get; init; }
+}
+
 public class BlindsFsm : FsmBase<BlindsState, BlindsTrigger>
 {
     private ICoverEntityCore Blinds { get; set; }
@@ -32,7 +40,7 @@ public class BlindsFsm : FsmBase<BlindsState, BlindsTrigger>
         Blinds = blinds;
         DefaultState = BlindsState.Closed;
         StoragePath = $"storage/v1/{Blinds.EntityId}_fsm.json";
-        CreateFsm();
+        InitFsm();
 
         _fsm.Configure(BlindsState.Closed)
             .PermitReentry(BlindsTrigger.AllCloseTrigger)
