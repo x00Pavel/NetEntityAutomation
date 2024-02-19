@@ -61,7 +61,8 @@ public abstract class AutomationBase<TEntity, TFsm>: IAutomationBase
         FsmList = new List<TFsm>();
         EntitiesList = Config.Entities.OfType<TEntity>().ToArray() ?? [];
         InitServices();
-        Logger.LogDebug("Working hours from {Start} - {End}", Config.StartAtTimeFunc(), Config.StopAtTimeFunc());
+        if (Config is { StartAtTimeFunc: not null, StopAtTimeFunc: not null })
+            Logger.LogDebug("Working hours from {Start} - {End}", Config.StartAtTimeFunc() , Config.StopAtTimeFunc());
         Logger.LogDebug("Night mode from{Start} - {End}", Config.NightMode.StartAtTimeFunc(), Config.NightMode.StopAtTimeFunc());
     }
 
