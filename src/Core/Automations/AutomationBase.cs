@@ -90,8 +90,8 @@ public abstract class AutomationBase<TEntity, TFsm>: IAutomationBase
     protected void CreateFsm()
     {
         Logger.LogDebug("Configuring {FsmName} ", typeof(TFsm).Name);
-        foreach (var blind in EntitiesList)
-            FsmList.Add(ConfigureFsm(blind));
+        foreach (var entity in EntitiesList)
+            FsmList.Add(ConfigureFsm(entity));
     }
     
     /// <summary>
@@ -107,7 +107,7 @@ public abstract class AutomationBase<TEntity, TFsm>: IAutomationBase
     /// </summary>
     /// <param name="id">HomeAssistant ID of the entity</param>
     /// <returns>Observable of StateChange</returns>
-    private IObservable<StateChange> EntityEvent(string id) => Context.StateAllChanges().Where(e => e.New?.EntityId == id);
+    protected IObservable<StateChange> EntityEvent(string id) => Context.StateAllChanges().Where(e => e.New?.EntityId == id);
     
     /// <summary>
     /// Observable for all state changes of a specific entity initiated by a user.
@@ -177,5 +177,18 @@ public abstract class AutomationBase<TEntity, TFsm>: IAutomationBase
             return UtilsMethods.NowInTimeRange(Config.StartAtTimeFunc(), Config.StopAtTimeFunc());
         Logger.LogWarning("Can't determine working hours. StartAtTimeFunc or StopAtTimeFunc is not set");
         return true;
+    }
+
+    protected CustomTimer? ResetTimerOrAction(CustomTimer timer, TimeSpan time, Action action, Func<bool> resetCondition)
+    {
+        if (resetCondition())
+        {
+            Logger.LogDebug("Resetting timer with time {Time}", time);
+            timer.StartTimer(time, () => ResetTimerOrAction(timer, time, action, resetCondition));
+            return timer;
+        }
+        Logger.LogDebug("Doing action {Action}", action.Method.Name);
+        action();
+        return null;
     }
 }

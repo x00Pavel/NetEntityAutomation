@@ -32,14 +32,12 @@ public struct BlindsStateActivateAction
 
 public class BlindsFsm : FsmBase<BlindsState, BlindsTrigger>
 {
-    private ICoverEntityCore Blinds { get; set; }
+    // private new ICoverEntityCore Entity { get; set; }
 
-    public BlindsFsm(AutomationConfig config, ILogger logger, ICoverEntityCore blinds) : base(config, logger)
+    public BlindsFsm(AutomationConfig config, ILogger logger, ICoverEntityCore blinds) : base(blinds, config, logger)
     {
         Logger = logger;
-        Blinds = blinds;
         DefaultState = BlindsState.Closed;
-        StoragePath = $"storage/v1/{Blinds.EntityId}_fsm.json";
         InitFsm();
     }
     

@@ -27,17 +27,17 @@ public class Room
         _roomConfig.Logger.LogDebug("Creating automations");
         foreach (var automation in _roomConfig.Entities)
         {
+            _roomConfig.Logger.LogDebug("Created {AutomationType}", automation.AutomationType);
             switch (automation.AutomationType)
             {
                 case AutomationType.MainLight:
+                    _automations.Add(new MainLightAutomationBase(_haContext, automation, _roomConfig.Logger));
                     break;
                 case AutomationType.SecondaryLight:
                     _automations.Add(new LightAutomationBase(_haContext, automation, _roomConfig.Logger));
-                    _roomConfig.Logger.LogDebug("Created SecondaryLight");
                     break;
                 case AutomationType.Blinds:
                     _automations.Add(new BlindAutomationBase(_haContext, automation, _roomConfig.Logger));
-                    _roomConfig.Logger.LogDebug("Created Blinds automation");
                     break;
                 default:
                     break;

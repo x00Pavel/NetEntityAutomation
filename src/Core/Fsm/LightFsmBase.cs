@@ -32,15 +32,11 @@ public struct LightStateActivateAction
 }
 public class LightFsmBase : FsmBase<LightState, LightTrigger>
 {
-    public ILightEntityCore Light { get; set; }
+    public new readonly ILightEntityCore Entity;
 
-    public LightFsmBase(ILightEntityCore light, AutomationConfig config, ILogger logger) : base(config, logger)
+    public LightFsmBase(ILightEntityCore light, AutomationConfig config, ILogger logger) : base(light, config, logger)
     {
-        Logger = logger;
-        Light = light;
         DefaultState = LightState.Off;
-        StoragePath = $"storage/v1/{light.EntityId}_fsm.json";
-        Timer = new CustomTimer(logger);
         InitFsm();
     }
 

@@ -1,4 +1,5 @@
 using Microsoft.Extensions.Logging;
+using NetDaemon.HassModel.Entities;
 using NetEntityAutomation.Extensions.Events;
 using NetEntityAutomation.Core.Configs;
 using Newtonsoft.Json;
@@ -22,16 +23,18 @@ public static class FsmBaseExtensionMethods
     }
 }
 
-public abstract class FsmBase<TState, TTrigger>(AutomationConfig config, ILogger logger): IFsmBase
+public abstract class FsmBase<TState, TTrigger>(IEntityCore entity, AutomationConfig config, ILogger logger): IFsmBase
 {
     private AutomationConfig Config { get; set; } = config;
     protected StateMachine<TState, TTrigger> _fsm;
     protected ILogger Logger = logger;
-    public CustomTimer Timer;
+    public CustomTimer Timer = new (logger);
     public TState State => _fsm.State;
     protected TState DefaultState;
-    protected string StoragePath;
     public bool IsEnabled { get; set; } = true;
+    public readonly IEntityCore Entity = entity;
+    private string StorageDir => $"storage/{GetType().Name}";
+    private string StoragePath => $"{StorageDir}/{Entity.EntityId}_fsm.json";
     protected record JsonStorageSchema(TState State);
 
     protected void InitFsm()
@@ -47,9 +50,14 @@ public abstract class FsmBase<TState, TTrigger>(AutomationConfig config, ILogger
 
     private TState GetStateFromStorage()
     {
+        if (!Directory.Exists(StorageDir))
+        {
+            Logger.LogDebug("Storage directory {Path} does not exist, creating new one", StorageDir);
+            Directory.CreateDirectory(StorageDir);
+        }
         if (!File.Exists(StoragePath))
         {
-            Logger.LogDebug("Storage file does not exist, creating new one");
+            Logger.LogDebug("Storage file {Path} does not exist, creating new one", StoragePath);
             File.Create(StoragePath).Dispose();
             File.WriteAllText(StoragePath, "{\"State\": " + JsonConvert.SerializeObject(DefaultState) + "}");
             return DefaultState;
