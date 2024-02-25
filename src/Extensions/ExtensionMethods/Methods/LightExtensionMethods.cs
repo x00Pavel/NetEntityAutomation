@@ -1,4 +1,5 @@
-﻿using NetDaemon.HassModel.Entities;
+﻿using System.Reactive.Linq;
+using NetDaemon.HassModel.Entities;
 using Newtonsoft.Json;
 
 namespace NetEntityAutomation.Extensions.ExtensionMethods;
@@ -63,5 +64,15 @@ public static class LightExtensionMethods
     public static LightParameters? GetLightParameters(this ILightEntityCore target)
     {   
         return JsonConvert.DeserializeObject<LightParameters>(target.HaContext.GetState(target.EntityId)?.AttributesJson.ToString() ?? "{}");
+    }
+    
+    public static IObservable<StateChange> OnEvent(this ILightEntityCore target)
+    {
+        return target.StateChange().Where(e => e.New?.State == "on");
+    }
+    
+    public static IObservable<StateChange> OffEvent(this ILightEntityCore target)
+    {
+        return target.StateChange().Where(e => e.New?.State == "off");
     }
 }
