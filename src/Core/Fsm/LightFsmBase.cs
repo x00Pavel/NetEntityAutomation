@@ -1,6 +1,5 @@
 using Microsoft.Extensions.Logging;
 using NetDaemon.HassModel.Entities;
-using NetEntityAutomation.Extensions.Events;
 using NetEntityAutomation.Core.Configs;
 
 namespace NetEntityAutomation.Core.Fsm;
@@ -31,12 +30,14 @@ public struct LightStateActivateAction
     
 }
 public class LightFsmBase : FsmBase<LightState, LightTrigger>
-{
-    public new readonly ILightEntityCore Entity;
+{   
+    public new ILightEntityCore Entity { get; init; }
 
-    public LightFsmBase(ILightEntityCore light, AutomationConfig config, ILogger logger) : base(light, config, logger)
+    public LightFsmBase(ILightEntityCore light, AutomationConfig config, ILogger logger) : base(config, logger)
     {
         DefaultState = LightState.Off;
+        Entity = light;
+        StoragePath = $"{StorageDir}/{Entity.EntityId}_fsm.json";
         InitFsm();
     }
 
@@ -109,7 +110,7 @@ public class LightFsmBase : FsmBase<LightState, LightTrigger>
     {
         _fsm.Fire(LightTrigger.AllOff);
     }
-
+    
     public void FireTimerElapsed()
     {
         _fsm.Fire(LightTrigger.TimerElapsed);

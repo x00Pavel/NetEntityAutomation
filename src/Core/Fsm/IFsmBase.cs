@@ -23,7 +23,7 @@ public static class FsmBaseExtensionMethods
     }
 }
 
-public abstract class FsmBase<TState, TTrigger>(IEntityCore entity, AutomationConfig config, ILogger logger): IFsmBase
+public abstract class FsmBase<TState, TTrigger>(AutomationConfig config, ILogger logger): IFsmBase
 {
     private AutomationConfig Config { get; set; } = config;
     protected StateMachine<TState, TTrigger> _fsm;
@@ -32,9 +32,10 @@ public abstract class FsmBase<TState, TTrigger>(IEntityCore entity, AutomationCo
     public TState State => _fsm.State;
     protected TState DefaultState;
     public bool IsEnabled { get; set; } = true;
-    public readonly IEntityCore Entity = entity;
-    private string StorageDir => $"storage/{GetType().Name}";
-    private string StoragePath => $"{StorageDir}/{Entity.EntityId}_fsm.json";
+    public IEntityCore Entity { get; init; }
+    protected string StorageDir => $"storage/{GetType().Name}";
+    protected string StoragePath { get; init; }
+
     protected record JsonStorageSchema(TState State);
 
     protected void InitFsm()
@@ -76,4 +77,5 @@ public abstract class FsmBase<TState, TTrigger>(IEntityCore entity, AutomationCo
     }
 
     public abstract void FireAllOff();
+    
 }
