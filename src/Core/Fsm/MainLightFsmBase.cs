@@ -27,14 +27,15 @@ public struct MainLightActivateAction
 
 public class MainLightFsmBase : FsmBase<MainLightState, MainLightTrigger>
 {
-    public new ILightEntityCore Entity { get; set; }
-    public MainLightFsmBase(ILightEntityCore light, AutomationConfig config, ILogger logger) : base(light, config, logger)
+    public new ILightEntityCore Entity { get; init; }
+    public MainLightFsmBase(ILightEntityCore light, AutomationConfig config, ILogger logger) : base(config, logger)
     {
         DefaultState = MainLightState.Off;
         Entity = light;
+        StoragePath = $"{StorageDir}/{Entity.EntityId}_fsm.json";
         InitFsm();
     }
-    
+
     public MainLightFsmBase Configure(MainLightActivateAction actions)
     {
         _fsm.Configure(MainLightState.Off)
@@ -43,22 +44,23 @@ public class MainLightFsmBase : FsmBase<MainLightState, MainLightTrigger>
             .PermitReentry(MainLightTrigger.SwitchOffTrigger)
             .PermitReentry(MainLightTrigger.AllOff)
             .Permit(MainLightTrigger.SwitchOnTrigger, MainLightState.On);
-        
+
         _fsm.Configure(MainLightState.On)
             .OnActivate(() => actions.OnAction(this))
             .Ignore(MainLightTrigger.TimerElapsed)
             .PermitReentry(MainLightTrigger.SwitchOnTrigger)
             .Permit(MainLightTrigger.AllOff, MainLightState.Off)
             .Permit(MainLightTrigger.SwitchOffTrigger, MainLightState.Off);
-        
+
         return this;
     }
-    
+
     public void FireOn() => _fsm.Fire(MainLightTrigger.SwitchOnTrigger);
-    
+
     public void FireOff() => _fsm.Fire(MainLightTrigger.SwitchOffTrigger);
-    
+
     public void FireTimerElapsed() => _fsm.Fire(MainLightTrigger.TimerElapsed);
-    
+
     public override void FireAllOff() => _fsm.Fire(MainLightTrigger.AllOff);
+    
 }

@@ -63,7 +63,7 @@ public abstract class AutomationBase<TEntity, TFsm>: IAutomationBase
         InitServices();
         if (Config is { StartAtTimeFunc: not null, StopAtTimeFunc: not null })
             Logger.LogDebug("Working hours from {Start} - {End}", Config.StartAtTimeFunc() , Config.StopAtTimeFunc());
-        Logger.LogDebug("Night mode from{Start} - {End}", Config.NightMode.StartAtTimeFunc(), Config.NightMode.StopAtTimeFunc());
+        Logger.LogDebug("Night mode from {Start} - {End}", Config.NightMode.StartAtTimeFunc(), Config.NightMode.StopAtTimeFunc());
     }
 
     /// <summary>

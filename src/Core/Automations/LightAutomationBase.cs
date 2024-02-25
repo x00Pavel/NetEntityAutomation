@@ -60,16 +60,17 @@ public class LightAutomationBase : AutomationBase<ILightEntityCore, LightFsmBase
         {
             case { IsEnabled: true, IsWorkingHours: true }:
                 Logger.LogDebug("Time of Night Mode {Time}", DateTime.Now.TimeOfDay);
-                foreach (var fsm in LightsOffByAutomation)
+                foreach (var light in LightsOffByAutomation.Select(fsm => fsm.Entity))
                 {
-                    if (Config.NightMode.Devices?.Contains(fsm.Entity) ?? false)
+                    if (Config.NightMode.Devices?.Contains(light) ?? false)
                     {
-                        _lightParameters[fsm.Entity.EntityId] = fsm.Entity.GetLightParameters() ?? new LightParameters
+                        Logger.LogDebug("Storing light parameters for night mode {Light}", light.EntityId);
+                        _lightParameters[light.EntityId] = light.GetLightParameters() ?? new LightParameters
                         {
                             Brightness = 255
                         };
-                    
-                        fsm.Entity.TurnOn(Config.NightMode.LightParameters);    
+                        Logger.LogDebug("Stored values for light {Light} : {LightParams}", light.EntityId, _lightParameters);
+                        light.TurnOn(Config.NightMode.LightParameters);    
                     }
                 }
                 Logger.LogDebug("Stored values for light {Light}", _lightParameters);
@@ -79,16 +80,16 @@ public class LightAutomationBase : AutomationBase<ILightEntityCore, LightFsmBase
                 if (_lightParameters.Count > 0)
                 {
                     // Restore light parameters after night mode
-                    foreach (var fsm in LightsOffByAutomation)
+                    foreach (var light in LightsOffByAutomation.Select(fsm => fsm.Entity))
                     {
-                        var lightParams = _lightParameters.TryGetValue(fsm.Entity.EntityId, out var parameters)
+                        var lightParams = _lightParameters.TryGetValue(light.EntityId, out var parameters)
                             ? parameters
                             : new LightParameters
                             {
                                 Brightness = 255
                             };
-                        fsm.Entity.TurnOn(lightParams);
-                        _lightParameters.Remove(fsm.Entity.EntityId);
+                        light.TurnOn(lightParams);
+                        _lightParameters.Remove(light.EntityId);
                     }
                     Logger.LogDebug("Idle values {Light}", _lightParameters);
                 }
