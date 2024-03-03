@@ -54,7 +54,7 @@ public class LightFsmBase : FsmBase<LightState, LightTrigger>
             .Permit(LightTrigger.SwitchOnTrigger, LightState.OnBySwitch);
 
         _fsm.Configure(LightState.OnByMotion)
-            .OnActivate(() =>lightStateActions.OnByMotionAction(this))
+            .OnActivate(() => lightStateActions.OnByMotionAction(this))
             .OnExit(Timer.Dispose)
             .PermitReentry(LightTrigger.MotionOnTrigger)
             .Ignore(LightTrigger.MotionOffTrigger)
