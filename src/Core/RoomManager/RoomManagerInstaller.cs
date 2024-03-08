@@ -9,7 +9,6 @@ public static class RoomManagerInstaller
 {
     public static IServiceCollection AddRoomManager(this IServiceCollection serviceCollection)
     {
-        Console.WriteLine(Assembly.GetCallingAssembly().FullName);
         serviceCollection.Scan(selector =>
                 // Entry assembly is ND app in this case.
                 selector.FromEntryAssembly()
