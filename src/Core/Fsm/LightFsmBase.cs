@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Logging;
 using NetDaemon.HassModel.Entities;
 using NetEntityAutomation.Core.Configs;
+using NetEntityAutomation.Extensions.ExtensionMethods;
 
 namespace NetEntityAutomation.Core.Fsm;
 
@@ -30,7 +31,8 @@ public struct LightStateActivateAction
     
 }
 public class LightFsmBase : FsmBase<LightState, LightTrigger>
-{   
+{
+    public LightParameters? LastParams;
     public new ILightEntityCore Entity { get; init; }
 
     public LightFsmBase(ILightEntityCore light, AutomationConfig config, ILogger logger) : base(config, logger)

@@ -5,6 +5,7 @@ using NetDaemon.HassModel.Entities;
 using NetEntityAutomation.Core.Configs;
 using NetEntityAutomation.Core.Fsm;
 using NetEntityAutomation.Extensions.ExtensionMethods;
+using Newtonsoft.Json;
 
 namespace NetEntityAutomation.Core.Automations;
 
@@ -65,31 +66,17 @@ public class LightAutomationBase : AutomationBase<ILightEntityCore, LightFsmBase
                 foreach (var light in LightsOffByAutomation.Select(fsm => fsm.Entity))
                 {
                     if (Config.NightMode.Devices?.Contains(light) ?? false)
-                    {
-                        _lightParameters[light.EntityId] = light.GetLightParameters() ?? DefaultLightParameters;
-                        Logger.LogDebug("Stored values for light {Light} : {LightParams}", light.EntityId, _lightParameters);
-                        light.TurnOn(Config.NightMode.LightParameters);    
-                    }
+                        light.TurnOn(Config.NightMode.LightParameters);
                 }
                 break;
             case { IsEnabled: true, IsWorkingHours: false }:
                 Logger.LogDebug("Normal working hours {Time}", DateTime.Now.TimeOfDay);
-                if (_lightParameters.Count > 0)
+                foreach (var fsm in LightsOffByAutomation)
                 {
-                    // Restore light parameters after night mode
-                    foreach (var light in LightsOffByAutomation.Select(fsm => fsm.Entity))
-                    {
-                        var lightParams = _lightParameters.TryGetValue(light.EntityId, out var parameters)
-                            ? parameters : DefaultLightParameters;
-                        Logger.LogDebug("Restoring light parameters for light {Light} : {LightParams}", light.EntityId, lightParams);
-                        light.TurnOn(lightParams);
-                        _lightParameters.Remove(light.EntityId);
-                    }
-                    Logger.LogDebug("Idle values {Light}", _lightParameters);
-                }
-                else
-                {
-                    LightsOffByAutomation.Select(fsm => fsm.Entity).TurnOn();
+                    var light = fsm.Entity;
+                    var par = fsm.LastParams ?? DefaultLightParameters;
+                    Logger.LogDebug("Restoring light parameters for light {Light} : {LightParams}", light.EntityId, par);
+                    light.TurnOn(par);
                 }
                 break;
             case { IsEnabled: false }:
@@ -165,7 +152,12 @@ public class LightAutomationBase : AutomationBase<ILightEntityCore, LightFsmBase
             {
                 Logger.LogDebug("Light Event: lights {Light} is in {State} without user by automation {User}",
                     e.New?.EntityId, e.New?.State, e.New?.Context?.UserId);
-                
+                if (!Config.NightMode.IsWorkingHours)
+                {
+                    Logger.LogDebug("Storing light parameters for light {Light} : {LightParams}", l.EntityId, e.Old?.AttributesJson);
+                    lightFsm.LastParams =
+                        JsonConvert.DeserializeObject<LightParameters>(e.Old?.AttributesJson.ToString() ?? "{}");
+                }
                 ChooseAction(OnLights > 0, lightFsm.FireMotionOff, FsmList.FireAllOff);
             });
 
@@ -186,6 +178,13 @@ public class LightAutomationBase : AutomationBase<ILightEntityCore, LightFsmBase
                         e.New?.EntityId,
                         e.New?.State,
                         e.New?.Context?.UserId);
+                    if (!Config.NightMode.IsWorkingHours)
+                    {
+                        Logger.LogDebug("Storing light parameters for light {Light} : {LightParams}", l.EntityId, e.Old?.AttributesJson);
+                        lightFsm.LastParams =
+                            JsonConvert.DeserializeObject<LightParameters>(e.Old?.AttributesJson.ToString() ?? "{}");
+                    }
+                    
                     ChooseAction(OnLights > 0, lightFsm.FireOff, FsmList.FireAllOff);
                 }
             );

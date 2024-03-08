@@ -1,7 +1,6 @@
 ﻿using System.Reactive.Linq;
 using System.Text.Json;
 using NetDaemon.HassModel.Entities;
-using Newtonsoft.Json;
 
 namespace NetEntityAutomation.Extensions.ExtensionMethods;
 
@@ -65,15 +64,6 @@ public static class LightExtensionMethods
     public static void TurnOn(this IEnumerable<ILightEntityCore> target, LightParameters parameters)
     {
         target.CallService("turn_on", parameters);
-    }
-    
-    public static LightParameters? GetLightParameters(this ILightEntityCore target)
-    {   
-        var attributes = target.HaContext.GetState(target.EntityId)?.AttributesJson.ToString() ?? "{}";
-        Console.WriteLine(attributes);
-        return JsonConvert.DeserializeObject<LightParameters>(attributes);
-        // return JsonConvert.DeserializeObject<LightParameters>(
-        //     target.HaContext.GetState(target.EntityId)?.AttributesJson.ToString() ?? "{}");
     }
     
     public static IObservable<StateChange> OnEvent(this ILightEntityCore target)
