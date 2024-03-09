@@ -1,5 +1,6 @@
 using Microsoft.Extensions.Logging;
 using NetDaemon.HassModel;
+using NetDaemon.HassModel.Integration;
 using NetEntityAutomation.Core.Automations;
 using NetEntityAutomation.Core.Configs;
 
@@ -20,6 +21,23 @@ public class Room
         _roomConfig.Logger.LogDebug("Creating room {RoomName}", roomConfig.Name);
         _haContext = haContext;
         InitAutomations();
+        InitServices();
+    }
+
+    private void InitServices()
+    {
+        var serviceName = _roomConfig.Name.ToLower().Replace(' ', '_') + "_service";
+        _haContext.RegisterServiceCallBack<RoomData>("toggle_" + serviceName, data =>
+        {   
+            _automations.ForEach(auto =>
+            {
+                auto.IsEnabled = !auto.IsEnabled;
+                _roomConfig.Logger.LogDebug("Toggling automation {AutomationName} to {IsEnabled}", 
+                    auto.GetType().Name,
+                    auto.IsEnabled ? "enabled" : "disabled");
+            });
+        });
+        _roomConfig.Logger.LogDebug("Service {ServiceName} initialised", serviceName);
     }
 
     private void InitAutomations()
@@ -43,7 +61,10 @@ public class Room
                     break;
             }
         }
-
         _roomConfig.Logger.LogDebug("Number of automations: {AutomationCount}", _automations.Count);
     }
+}
+
+internal record RoomData
+{
 }

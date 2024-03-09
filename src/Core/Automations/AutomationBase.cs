@@ -21,9 +21,24 @@ internal record ServiceData
     public string? value { get; init; }
 }
 
-public interface IAutomationBase
+public abstract class IAutomationBase
 {
-}/// <summary>
+    private bool _enabled = true;
+    public IObservable<bool> IsEnabledObserver;
+    public event EventHandler<bool>? IsEnabledChanged;
+    public bool IsEnabled
+    {
+        get => _enabled;
+        set
+        {
+            if (_enabled == value) return;
+            _enabled = value;
+            IsEnabledChanged?.Invoke(this, value);
+        }
+    }
+}
+
+/// <summary>
  /// This class represents a base for all automations.
  /// The automation works with certain type of entities and uses Finite State Machine to store and represent the state of the entities.
  /// </summary>
@@ -34,21 +49,9 @@ public abstract class AutomationBase<TEntity, TFsm>: IAutomationBase
     protected IHaContext Context { get; set; }
     protected ILogger Logger { get; set; }
     protected AutomationConfig Config { get; set; }
-    protected IEnumerable<TEntity> EntitiesList { get; set; }
+    protected List<TEntity> EntitiesList { get; set; }
     protected List<TFsm> FsmList;
-    protected IObservable<bool> IsEnabledObserver;
-    private bool isEnabled { get; set; } = true;
-    public event EventHandler<bool>? IsEnabledChanged;
-    public bool IsEnabled
-    {
-        get => isEnabled;
-        set
-        {
-            if (isEnabled == value) return;
-            isEnabled = value;
-            IsEnabledChanged?.Invoke(this, value);
-        }
-    }
+    
     protected AutomationBase(IHaContext context, AutomationConfig config, ILogger logger)
     {
         Context = context;
@@ -59,8 +62,7 @@ public abstract class AutomationBase<TEntity, TFsm>: IAutomationBase
             handler => IsEnabledChanged -= handler
         ).Select(pattern => pattern.EventArgs);
         FsmList = new List<TFsm>();
-        EntitiesList = Config.Entities.OfType<TEntity>().ToArray() ?? [];
-        InitServices();
+        EntitiesList = Config.Entities.OfType<TEntity>().ToList();
         if (Config is { StartAtTimeFunc: not null, StopAtTimeFunc: not null })
             Logger.LogDebug("Working hours from {Start} - {End}", Config.StartAtTimeFunc() , Config.StopAtTimeFunc());
         Logger.LogDebug("Night mode from {Start} - {End}", Config.NightMode.StartAtTimeFunc(), Config.NightMode.StopAtTimeFunc());
@@ -121,7 +123,7 @@ public abstract class AutomationBase<TEntity, TFsm>: IAutomationBase
     /// <returns></returns>
     protected IObservable<StateChange> UserEvent(string id) => EntityEvent(id)
         .Where(e => !e.IsAutomationInitiated(Config.ServiceAccountId));
-    
+
     /// <summary>
     /// Observable for all state changes of a specific entity initiated by the automation.
     /// This method uses ServiceAccountId to determine if the state change was initiated by the automation.
@@ -141,36 +143,15 @@ public abstract class AutomationBase<TEntity, TFsm>: IAutomationBase
     protected static void ChooseAction(bool condition, Action action, Action elseAction) => (condition ? action : elseAction)();
     
     /// <summary>
-    /// This method is used to initialise services for manipulating with the automation from Home Assistant side.
-    /// It is not yet fully implemented!
+    /// Helper observable for making actions when automation is disabled.
     /// </summary>
-    private void InitServices()
-    {
-    //     Context.RegisterServiceCallBack<ServiceData>($"automation_{Config.Name.Replace(' ', '_').ToLower()}_service", 
-    //         e =>
-    //         {
-    //             if (Enum.TryParse<ServiceAction>(e.action, ignoreCase: true, out var action))
-    //             {
-    //                 
-    //                 Logger.LogInformation("Service called action: {Action}", action);
-    //                 IsEnabled = action switch
-    //                 {
-    //                     ServiceAction.Disable => false,
-    //                     ServiceAction.Enable => true,
-    //                     ServiceAction.Toggle => !isEnabled,
-    //                     _ => isEnabled
-    //                 };
-    //                 
-    //                 Logger.LogDebug("Automation {AutomationName} is now {AutomationState}", Config.Name, isEnabled ? "enabled" : "disabled");
-    //             }
-    //             else
-    //             {
-    //                 Logger.LogWarning("Service called with unknown action: {Action} value: {value}",
-    //                     e.action, e.value);
-    //             }
-    //         });
-    }
-
+    public IObservable<bool> AutomationDisabled => IsEnabledObserver.Where(enabled => !enabled);
+    
+    /// <summary>
+    /// Helper observable for making actions when automation is enabled.
+    /// </summary>
+    public IObservable<bool> AutomationEnabled => IsEnabledObserver.Where(enabled => enabled);
+    
     protected bool IsWorkingHours()
     {
         if (Config is { StartAtTimeFunc: not null, StopAtTimeFunc: not null })
