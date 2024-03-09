@@ -4,6 +4,7 @@ using NetDaemon.HassModel;
 using NetDaemon.HassModel.Entities;
 using NetEntityAutomation.Core.Configs;
 using NetEntityAutomation.Core.Fsm;
+using NetEntityAutomation.Core.Triggers;
 using NetEntityAutomation.Extensions.ExtensionMethods;
 using Newtonsoft.Json;
 
@@ -38,27 +39,43 @@ public class LightAutomationBase : AutomationBase<ILightEntityCore, LightFsmBase
 
         foreach (var sensor in Config.Triggers)
         {
-            sensor.On.Subscribe(TurnOnByAutomation);
+            sensor.On.Subscribe(e => { if (IsEnabled) TurnOnByAutomation(e.Entity); });
         }
+        
+        AutomationDisabled.Subscribe(e =>
+        {
+            Logger.LogDebug("Disabling automation {Automation}", nameof(LightAutomationBase));
+            foreach (var fsm in LightOnByAutomation)
+            {
+                fsm.Timer.Dispose();
+            }
+        });
+        
+        AutomationEnabled.Subscribe(e =>
+        {
+            Logger.LogDebug("Enabling automation {Automation}", nameof(LightAutomationBase));
+            if (Config.Triggers.IsAllOn())
+                EntitiesList.ForEach(l => TurnOnByAutomation(l));
+        });
     }
     
-    private void TurnOnByAutomation(StateChange e)
+    private void TurnOnByAutomation(IEntityCore entityCore)
     {
         if (!IsWorkingHours())
         {
             Logger.LogDebug("Turning on lights by motion sensor {Sensor} is not allowed because it's not working hours",
-                e.Entity.EntityId);
+                entityCore.EntityId);
             return;
         }
 
         if (!Config.Conditions.All(c => c.IsTrue()))
         {
             Logger.LogDebug("Not all conditions are met to turn on lights by motion sensor {Sensor}",
-                e.Entity.EntityId);
+                entityCore.EntityId);
             return; 
         }
 
-        Logger.LogDebug("Turning on lights by motion sensor {Sensor}", e.Entity.EntityId);
+        Logger.LogDebug("Turning on lights by motion sensor {Sensor}", entityCore.EntityId);
         switch (Config.NightMode)
         {
             case { IsEnabled: true, IsWorkingHours: true }:
