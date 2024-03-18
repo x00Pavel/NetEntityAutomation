@@ -34,7 +34,7 @@ public class BlindsFsm : FsmBase<BlindsState, BlindsTrigger>
 {
     // private new ICoverEntityCore Entity { get; set; }
 
-    public BlindsFsm(AutomationConfig config, ILogger logger, ICoverEntityCore blinds) : base(config, logger)
+    public BlindsFsm(ILogger logger, ICoverEntityCore blinds) : base(logger)
     {
         Logger = logger;
         DefaultState = BlindsState.Closed;

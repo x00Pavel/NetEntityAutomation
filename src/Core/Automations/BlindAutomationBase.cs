@@ -1,10 +1,9 @@
 using System.Reactive.Linq;
 using Microsoft.Extensions.Logging;
-using NetDaemon.HassModel;
 using NetDaemon.HassModel.Entities;
-using NetEntityAutomation.Extensions.ExtensionMethods;
-using NetEntityAutomation.Core.Configs;
 using NetEntityAutomation.Core.Fsm;
+using NetEntityAutomation.Extensions.ExtensionMethods;
+
 namespace NetEntityAutomation.Core.Automations;
 
 /// <summary>
@@ -13,24 +12,18 @@ namespace NetEntityAutomation.Core.Automations;
 /// </summary>
 public class BlindAutomationBase : AutomationBase<ICoverEntityCore, BlindsFsm>
 {
-    private readonly ISunEntityCore _sun;
+    public required ISunEntityCore Sun { get; set; }
     private int OpenBlinds => EntitiesList.Count(b => Context.GetState(b.EntityId)?.State == "open");
-
-    public BlindAutomationBase(IHaContext haContext, AutomationConfig automation, ILogger roomConfigLogger): base(haContext, automation, roomConfigLogger)
-    {
-        _sun = Config.Entities.OfType<ISunEntityCore>().First();
-        CreateFsm();
-        ConfigureAutomation();
-    }
+    
 
     private bool IsOpenTime()
     {
-        return (Config.StartAtTimeFunc == null, Config.StopAtTimeFunc == null) switch
+        return (StartAtTimeFunc == null, StopAtTimeFunc == null) switch
         {
-            (true, true) => _sun.IsAboveHorizon(),
-            (false, false) => UtilsMethods.NowInTimeRange(Config.StartAtTimeFunc!(), Config.StopAtTimeFunc!()),
-            (true, false) => _sun.IsAboveHorizon() && UtilsMethods.NowAfterTime(Config.StopAtTimeFunc!()),
-            (false, true) => UtilsMethods.NowBeforeTime(Config.StartAtTimeFunc!()) && _sun.IsAboveHorizon(),
+            (true, true) => Sun.IsAboveHorizon(),
+            (false, false) => UtilsMethods.NowInTimeRange(StartAtTimeFunc!(), StopAtTimeFunc!()),
+            (true, false) => Sun.IsAboveHorizon() && UtilsMethods.NowAfterTime(StopAtTimeFunc!()),
+            (false, true) => UtilsMethods.NowBeforeTime(StartAtTimeFunc!()) && Sun.IsAboveHorizon(),
         };
     }
     
@@ -47,7 +40,7 @@ public class BlindAutomationBase : AutomationBase<ICoverEntityCore, BlindsFsm>
     
     protected override BlindsFsm ConfigureFsm(ICoverEntityCore blind)
     {   
-        var fsm = new BlindsFsm(Config, Logger, blind).Configure(BlindsActivateActions(blind));
+        var fsm = new BlindsFsm(Logger, blind).Configure(BlindsActivateActions(blind));
         UserClose(blind.EntityId).Subscribe(_ => ChooseAction(OpenBlinds > 0, fsm.FireManualClose, FsmList.FireAllOff));
         UserOpen(blind.EntityId).Subscribe(_ => fsm.FireManualOpen());
         AutomationClose(blind.EntityId).Subscribe(_ =>ChooseAction(OpenBlinds > 0, fsm.FireAutomationClose,  fsm.FireAutomationClose));
@@ -55,30 +48,31 @@ public class BlindAutomationBase : AutomationBase<ICoverEntityCore, BlindsFsm>
         return fsm;
     }
 
-    private void ConfigureAutomation()
-    {   
+    public override void ConfigureAutomation()
+    {
+        CreateFsm();
         Logger.LogDebug("Configuring blind automation");
-        if (Config.StartAtTimeFunc == null)
+        if (StartAtTimeFunc == null)
         {
-            _sun.AboveHorizon().Subscribe(_ => EntitiesList.OpenCover());
+            Sun.AboveHorizon().Subscribe(_ => EntitiesList.OpenCover());
             Logger.LogDebug("Subscribed to sun above horizon event to open blinds");
         }
         else
         {
-            var time = Config.StartAtTimeFunc.Invoke();
+            var time = StartAtTimeFunc.Invoke();
             DailyEventAtTime(time, EntitiesList.OpenCover);
             Logger.LogDebug("Subscribed to daily event at {Time} to open blinds", time);
         }
         
-        if (Config.StopAtTimeFunc == null)
+        if (StopAtTimeFunc == null)
         {
-            _sun.BelowHorizon().Subscribe(_ => EntitiesList.CloseCover());
+            Sun.BelowHorizon().Subscribe(_ => EntitiesList.CloseCover());
             Logger.LogDebug("Subscribed to sun below horizon event to close blinds");
         }
         else
         {
-            DailyEventAtTime(Config.StopAtTimeFunc.Invoke(), EntitiesList.CloseCover);
-            Logger.LogDebug("Subscribed to daily event at {Time} to close blinds", Config.StopAtTimeFunc.Invoke());
+            DailyEventAtTime(StopAtTimeFunc.Invoke(), EntitiesList.CloseCover);
+            Logger.LogDebug("Subscribed to daily event at {Time} to close blinds", StopAtTimeFunc.Invoke());
         }
     }
     

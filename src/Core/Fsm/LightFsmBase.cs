@@ -35,7 +35,7 @@ public class LightFsmBase : FsmBase<LightState, LightTrigger>
     public LightParameters? LastParams;
     public new ILightEntityCore Entity { get; init; }
 
-    public LightFsmBase(ILightEntityCore light, AutomationConfig config, ILogger logger) : base(config, logger)
+    public LightFsmBase(ILightEntityCore light, ILogger logger) : base(logger)
     {
         DefaultState = LightState.Off;
         Entity = light;

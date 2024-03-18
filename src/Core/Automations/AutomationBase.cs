@@ -2,30 +2,32 @@ using System.Reactive.Linq;
 using Microsoft.Extensions.Logging;
 using NetDaemon.HassModel;
 using NetDaemon.HassModel.Entities;
+using NetEntityAutomation.Core.Conditions;
 using NetEntityAutomation.Core.Configs;
+using NetEntityAutomation.Core.Triggers;
 using NetEntityAutomation.Extensions.Events;
 using NetEntityAutomation.Extensions.ExtensionMethods;
 
 namespace NetEntityAutomation.Core.Automations;
 
-internal enum ServiceAction
-{
-    Disable,
-    Enable,
-    Toggle,
-}
 
-internal record ServiceData
-{
-    public string? action { get; init; }
-    public string? value { get; init; }
-}
-
-public abstract class IAutomationBase
+public abstract class AutomationBase: IAutomationConfig
 {
     private bool _enabled = true;
-    public IObservable<bool> IsEnabledObserver;
+    public readonly IObservable<bool> IsEnabledObserver;
     public event EventHandler<bool>? IsEnabledChanged;
+    public IEnumerable<IStateChangeTrigger> Triggers { get; set; }
+    public IEnumerable<ICondition> Conditions { get; set; } = new []{new DefaultCondition()};
+    public string ServiceAccountId { get; set; }
+    public TimeSpan WaitTime { get; set; }
+    public TimeSpan SwitchTimer { get; set; }
+    public Func<TimeSpan>? StopAtTimeFunc { get; set; }
+    public Func<TimeSpan>? StartAtTimeFunc { get; set; }
+    public NightModeConfig NightMode { get; set; }
+    public IHaContext Context { get; set; }
+    public ILogger Logger { get; set; }
+    public abstract void ConfigureAutomation();
+    
     public bool IsEnabled
     {
         get => _enabled;
@@ -36,6 +38,13 @@ public abstract class IAutomationBase
             IsEnabledChanged?.Invoke(this, value);
         }
     }
+    protected AutomationBase()
+    {
+        IsEnabledObserver = Observable.FromEventPattern<bool>(
+            handler => IsEnabledChanged += handler,
+            handler => IsEnabledChanged -= handler
+        ).Select(pattern => pattern.EventArgs);
+    }
 }
 
 /// <summary>
@@ -44,30 +53,11 @@ public abstract class IAutomationBase
  /// </summary>
  /// <typeparam name="TEntity">Type of entities an automation will work with</typeparam>
  /// <typeparam name="TFsm">Type of Finite State Machine that will be used for storing and representing the state of TEntity</typeparam>
-public abstract class AutomationBase<TEntity, TFsm>: IAutomationBase
+public abstract class AutomationBase<TEntity, TFsm>: AutomationBase
 {
-    protected IHaContext Context { get; set; }
-    protected ILogger Logger { get; set; }
-    protected AutomationConfig Config { get; set; }
-    protected List<TEntity> EntitiesList { get; set; }
-    protected List<TFsm> FsmList;
+    public List<TEntity> EntitiesList { get; set; }
+    protected List<TFsm> FsmList { get; } = [];
     
-    protected AutomationBase(IHaContext context, AutomationConfig config, ILogger logger)
-    {
-        Context = context;
-        Logger = logger;
-        Config = config;
-        IsEnabledObserver = Observable.FromEventPattern<bool>(
-            handler => IsEnabledChanged += handler,
-            handler => IsEnabledChanged -= handler
-        ).Select(pattern => pattern.EventArgs);
-        FsmList = new List<TFsm>();
-        EntitiesList = Config.Entities.OfType<TEntity>().ToList();
-        if (Config is { StartAtTimeFunc: not null, StopAtTimeFunc: not null })
-            Logger.LogDebug("Working hours from {Start} - {End}", Config.StartAtTimeFunc() , Config.StopAtTimeFunc());
-        Logger.LogDebug("Night mode from {Start} - {End}", Config.NightMode.StartAtTimeFunc(), Config.NightMode.StopAtTimeFunc());
-    }
-
     /// <summary>
     /// Helper method to trigger an event at a specific time of the day.
     /// It uses Observable.Timer to trigger the event.
@@ -122,7 +112,7 @@ public abstract class AutomationBase<TEntity, TFsm>: IAutomationBase
     /// <param name="id"></param>
     /// <returns></returns>
     protected IObservable<StateChange> UserEvent(string id) => EntityEvent(id)
-        .Where(e => !e.IsAutomationInitiated(Config.ServiceAccountId));
+        .Where(e => !e.IsAutomationInitiated(ServiceAccountId));
 
     /// <summary>
     /// Observable for all state changes of a specific entity initiated by the automation.
@@ -131,7 +121,7 @@ public abstract class AutomationBase<TEntity, TFsm>: IAutomationBase
     /// <param name="id">Account ID which owns the token for NetDaemon</param>
     /// <returns></returns>
     protected IObservable<StateChange> AutomationEvent(string id) => EntityEvent(id)
-        .Where(e => e.IsAutomationInitiated(Config.ServiceAccountId));
+        .Where(e => e.IsAutomationInitiated(ServiceAccountId));
     
     /// <summary>
     /// Helper function to choose between two actions based on a condition.
@@ -154,8 +144,8 @@ public abstract class AutomationBase<TEntity, TFsm>: IAutomationBase
     
     protected bool IsWorkingHours()
     {
-        if (Config is { StartAtTimeFunc: not null, StopAtTimeFunc: not null })
-            return UtilsMethods.NowInTimeRange(Config.StartAtTimeFunc(), Config.StopAtTimeFunc());
+        if (NightMode is { StartAtTimeFunc: not null, StopAtTimeFunc: not null })
+            return UtilsMethods.NowInTimeRange(StartAtTimeFunc(), StopAtTimeFunc());
         Logger.LogWarning("Can't determine working hours. StartAtTimeFunc or StopAtTimeFunc is not set");
         return true;
     }

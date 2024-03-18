@@ -1,6 +1,5 @@
 using Microsoft.Extensions.Logging;
 using NetDaemon.HassModel;
-using NetEntityAutomation.Core.Configs;
 
 namespace NetEntityAutomation.Core.RoomManager;
 
@@ -12,20 +11,15 @@ namespace NetEntityAutomation.Core.RoomManager;
 public class RoomManager : IRoomManager
 {
     private readonly List<Room> _rooms = [];
+    private readonly List<IRoomConfig> configs;
+    private readonly IHaContext haContext;
 
-    public RoomManager(IHaContext haContext, ILogger<RoomManager> logger, IEnumerable<IRoomConfig> rooms)
+    public RoomManager(IHaContext context, ILogger<RoomManager> logger, IEnumerable<IRoomConfig> rooms)
     {
         logger.LogInformation("Initialising room manager");
-        logger.LogInformation("Number of rooms: {RoomCount}", rooms.Count());
-        if (haContext == null)
-        {
-            logger.LogError("HaContext is null");
-            throw new ArgumentNullException(nameof(haContext));
-        }
-
-        foreach (var roomConfig in rooms)
-        {
-            _rooms.Add(new Room(roomConfig, haContext));
-        }
+        haContext = context ?? throw new ArgumentNullException(nameof(context));
+        configs = rooms.ToList();
+        configs.ForEach(config =>  _rooms.Add(new Room(config, haContext)));
+        logger.LogInformation("Number of rooms: {RoomCount}", configs.Count);
     }
 }

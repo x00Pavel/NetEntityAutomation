@@ -23,9 +23,8 @@ public static class FsmBaseExtensionMethods
     }
 }
 
-public abstract class FsmBase<TState, TTrigger>(AutomationConfig config, ILogger logger): IFsmBase
+public abstract class FsmBase<TState, TTrigger>(ILogger logger): IFsmBase
 {
-    private AutomationConfig Config { get; set; } = config;
     protected StateMachine<TState, TTrigger> _fsm;
     protected ILogger Logger = logger;
     public CustomTimer Timer = new (logger);
