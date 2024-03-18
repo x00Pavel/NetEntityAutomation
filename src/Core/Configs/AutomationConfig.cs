@@ -1,6 +1,7 @@
-using NetDaemon.HassModel.Entities;
-using NetEntityAutomation.Core.Triggers;
+using Microsoft.Extensions.Logging;
+using NetDaemon.HassModel;
 using NetEntityAutomation.Core.Conditions;
+using NetEntityAutomation.Core.Triggers;
 
 namespace NetEntityAutomation.Core.Configs;
 
@@ -8,25 +9,18 @@ namespace NetEntityAutomation.Core.Configs;
 /// Class represents a configuration for automation.
 /// It is used to configure the automation by providing entities, triggers, conditions and other settings.
 /// </summary>
-public record AutomationConfig
+public interface IAutomationConfig
 {
     /// <summary>
     /// Entities that are used by the automation (including secondary entities that acts as a trigger like a Sun entity).
     /// On automation configuration phase, this list will be filtered to the specific type of entities based on automation type.
     /// </summary>
-    public IEnumerable<IEntityCore> Entities { get; set; }
     
-    /// <summary>
-    /// Type of automation.
-    /// All types are presented at <see cref="AutomationType">this</see> doc.
-    /// </summary>
-    public AutomationType AutomationType { get; set; }
-
     /// <summary>
     /// Triggers are used to trigger the automation.
     /// The automation is relies that trigger will return input_boolean meaning On/Off state.
     /// </summary>
-    public IEnumerable<IStateChangeTrigger> Triggers { get; set; } = new List<IStateChangeTrigger>();
+    public IEnumerable<IStateChangeTrigger> Triggers { get; set; } //= new List<IStateChangeTrigger>();
     
     /// <summary>
     /// A list of conditions when the automation should be triggered.
@@ -34,7 +28,7 @@ public record AutomationConfig
     /// It is mostly used for custom conditions.
     /// E.g if someone is at home, if tracker device is in sleep mode, etc.
     /// </summary>
-    public IEnumerable<ICondition> Conditions { get; set; } = new List<ICondition> { new DefaultCondition() };
+    public IEnumerable<ICondition> Conditions { get; set; } //= new List<ICondition> { new DefaultCondition() };
     
     /// <summary>
     /// Account ID which owns the token for NetDaemon.
@@ -46,13 +40,13 @@ public record AutomationConfig
     /// Time for waiting for the next trigger event.
     /// E.g. in light scenario, after light was turned on by automation (triggered by motion sensor), the automation will check for motion after this period of time.
     /// </summary>
-    public TimeSpan WaitTime { get; set; } = TimeSpan.FromSeconds(60);
+    public TimeSpan WaitTime { get; set; } // = TimeSpan.FromSeconds(60);
     
     /// <summary>
     /// Time after manual interaction with the automation to trigger the event.
     /// E.g. in light scenario, after light was turned on by switch (manualy, from HA), the automation will turn off the light if there is no motion after this period of time.
     /// </summary>
-    public TimeSpan SwitchTimer { get; set; } = TimeSpan.FromHours(2);
+    public TimeSpan SwitchTimer { get; set; } // = TimeSpan.FromHours(2);
     
     /// <summary>
     /// Callable that returns time when the automation should stop working.
@@ -68,7 +62,7 @@ public record AutomationConfig
     /// </list>
     /// </remarks>
     /// </summary>
-    public Func<TimeSpan>? StopAtTimeFunc { get; set; } = () => DateTime.Parse("06:00").TimeOfDay;
+    public Func<TimeSpan>? StopAtTimeFunc { get; set; } //= () => DateTime.Parse("06:00").TimeOfDay;
     
     /// <summary>
     /// Callable that returns time when the automation should start working.
@@ -84,10 +78,16 @@ public record AutomationConfig
     /// </list>
     /// </remarks>
     /// </summary>
-    public Func<TimeSpan>? StartAtTimeFunc { get; set; } = () => DateTime.Parse("18:00").TimeOfDay;
+    public Func<TimeSpan>? StartAtTimeFunc { get; set; } //= () => DateTime.Parse("18:00").TimeOfDay;
     
     /// <summary>
     /// Configuration for night mode. 
     /// </summary>
-    public NightModeConfig NightMode { get; set; } = new();
+    public NightModeConfig NightMode { get; set; } //= new();
+    
+    public IHaContext Context { get; set; }
+    
+    public ILogger Logger { get; set; }
+    
+    public void ConfigureAutomation();
 }

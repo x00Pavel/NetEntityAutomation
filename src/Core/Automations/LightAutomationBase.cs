@@ -1,8 +1,6 @@
 using System.Reactive.Linq;
 using Microsoft.Extensions.Logging;
-using NetDaemon.HassModel;
 using NetDaemon.HassModel.Entities;
-using NetEntityAutomation.Core.Configs;
 using NetEntityAutomation.Core.Fsm;
 using NetEntityAutomation.Core.Triggers;
 using NetEntityAutomation.Extensions.ExtensionMethods;
@@ -23,21 +21,14 @@ namespace NetEntityAutomation.Core.Automations;
 /// </summary>
 public class LightAutomationBase : AutomationBase<ILightEntityCore, LightFsmBase>
 {
-    private readonly Dictionary<string, LightParameters> _lightParameters = new ();
-    
-    private static LightParameters DefaultLightParameters => new LightParameters {Brightness = 255};
-    
-    public LightAutomationBase(IHaContext context, AutomationConfig config, ILogger logger): base(context, config, logger)
+    private static LightParameters DefaultLightParameters => new() {Brightness = 255};
+
+    public override void ConfigureAutomation()
     {
         CreateFsm();
-        ConfigureAutomation();
-    }
-
-    private void ConfigureAutomation()
-    {
         Logger.LogDebug("Subscribing to motion sensor events");
 
-        foreach (var sensor in Config.Triggers)
+        foreach (var sensor in Triggers)
         {
             sensor.On.Subscribe(e => { if (IsEnabled) TurnOnByAutomation(e.Entity); });
         }
@@ -54,13 +45,17 @@ public class LightAutomationBase : AutomationBase<ILightEntityCore, LightFsmBase
         AutomationEnabled.Subscribe(e =>
         {
             Logger.LogDebug("Enabling automation {Automation}", nameof(LightAutomationBase));
-            if (Config.Triggers.IsAllOn())
-                EntitiesList.ForEach(l => TurnOnByAutomation(l));
+            if (Triggers.IsAllOn())
+                EntitiesList.ForEach(TurnOnByAutomation);
         });
     }
     
-    private void TurnOnByAutomation(IEntityCore entityCore)
+    private void TurnOnByAutomation(IEntityCore? entityCore)
     {
+        if (entityCore == null)
+        {
+            throw new NullReferenceException("Light entity is null. Cannot turn on lights by motion sensor.");
+        }
         if (!IsWorkingHours())
         {
             Logger.LogDebug("Turning on lights by motion sensor {Sensor} is not allowed because it's not working hours",
@@ -68,7 +63,7 @@ public class LightAutomationBase : AutomationBase<ILightEntityCore, LightFsmBase
             return;
         }
 
-        if (!Config.Conditions.All(c => c.IsTrue()))
+        if (!Conditions.All(c => c.IsTrue()))
         {
             Logger.LogDebug("Not all conditions are met to turn on lights by motion sensor {Sensor}",
                 entityCore.EntityId);
@@ -76,14 +71,14 @@ public class LightAutomationBase : AutomationBase<ILightEntityCore, LightFsmBase
         }
 
         Logger.LogDebug("Turning on lights by motion sensor {Sensor}", entityCore.EntityId);
-        switch (Config.NightMode)
+        switch (NightMode)
         {
             case { IsEnabled: true, IsWorkingHours: true }:
                 Logger.LogDebug("Time of Night Mode {Time}", DateTime.Now.TimeOfDay);
                 foreach (var light in LightsOffByAutomation.Select(fsm => fsm.Entity))
                 {
-                    if (Config.NightMode.Devices?.Contains(light) ?? false)
-                        light.TurnOn(Config.NightMode.LightParameters);
+                    if (NightMode.Devices?.Contains(light) ?? false)
+                        light.TurnOn(NightMode.LightParameters);
                 }
                 break;
             case { IsEnabled: true, IsWorkingHours: false }:
@@ -105,7 +100,7 @@ public class LightAutomationBase : AutomationBase<ILightEntityCore, LightFsmBase
         }
     }
 
-    private bool OnConditionsMet() => IsWorkingHours() && Config.Triggers.Any(s => s.IsOn()) && Config.Conditions.All(c => c.IsTrue());
+    private bool OnConditionsMet() => IsWorkingHours() && Triggers.Any(s => s.IsOn()) && Conditions.All(c => c.IsTrue());
 
     private LightStateActivateAction ActionForLight(ILightEntityCore l)
     {
@@ -122,7 +117,7 @@ public class LightAutomationBase : AutomationBase<ILightEntityCore, LightFsmBase
                 if (OnConditionsMet())
                 {
                     l.TurnOn();
-                    ResetTimerOrAction(lightFsm.Timer, Config.WaitTime, lightFsm.Entity.TurnOff, OnConditionsMet);
+                    ResetTimerOrAction(lightFsm.Timer, WaitTime, lightFsm.Entity.TurnOff, OnConditionsMet);
                 }
                 else
                 {
@@ -135,7 +130,7 @@ public class LightAutomationBase : AutomationBase<ILightEntityCore, LightFsmBase
                 if (OnConditionsMet())
                 {
                     l.TurnOn();
-                    ResetTimerOrAction(lightFsm.Timer, Config.WaitTime, lightFsm.Entity.TurnOff, OnConditionsMet);
+                    ResetTimerOrAction(lightFsm.Timer, WaitTime, lightFsm.Entity.TurnOff, OnConditionsMet);
                 }
                 else
                 {
@@ -153,7 +148,7 @@ public class LightAutomationBase : AutomationBase<ILightEntityCore, LightFsmBase
     
     protected override LightFsmBase ConfigureFsm(ILightEntityCore l)
     {
-        var lightFsm = new LightFsmBase(l, Config, Logger).Configure(ActionForLight(l));
+        var lightFsm = new LightFsmBase(l, Logger).Configure(ActionForLight(l));
         
         AutomationOn(l.EntityId)
             .Subscribe(e =>
@@ -162,14 +157,14 @@ public class LightAutomationBase : AutomationBase<ILightEntityCore, LightFsmBase
                     e.New?.EntityId, e.New?.State, e.New?.Context?.UserId);
                 lightFsm.FireMotionOn();
                 // This is needed to reset the timer if timeout is expired, but there is still a motion
-                ResetTimerOrAction(lightFsm.Timer, Config.WaitTime, lightFsm.Entity.TurnOff, OnConditionsMet);
+                ResetTimerOrAction(lightFsm.Timer, WaitTime, lightFsm.Entity.TurnOff, OnConditionsMet);
             });
         AutomationOff(l.EntityId)
             .Subscribe(e =>
             {
                 Logger.LogDebug("Light Event: lights {Light} is in {State} without user by automation {User}",
                     e.New?.EntityId, e.New?.State, e.New?.Context?.UserId);
-                if (!Config.NightMode.IsWorkingHours)
+                if (!NightMode.IsWorkingHours)
                 {
                     Logger.LogDebug("Storing light parameters for light {Light} : {LightParams}", l.EntityId, e.Old?.AttributesJson);
                     lightFsm.LastParams =
@@ -186,7 +181,7 @@ public class LightAutomationBase : AutomationBase<ILightEntityCore, LightFsmBase
                     e.New?.State,
                     e.New?.Context?.UserId);
                 lightFsm.FireOn();
-                lightFsm.Timer.StartTimer(Config.SwitchTimer, lightFsm.Entity.TurnOff);
+                lightFsm.Timer.StartTimer(SwitchTimer, lightFsm.Entity.TurnOff);
             });
         UserOff(l.EntityId)
             .Subscribe(e =>
@@ -195,7 +190,7 @@ public class LightAutomationBase : AutomationBase<ILightEntityCore, LightFsmBase
                         e.New?.EntityId,
                         e.New?.State,
                         e.New?.Context?.UserId);
-                    if (!Config.NightMode.IsWorkingHours)
+                    if (!NightMode.IsWorkingHours)
                     {
                         Logger.LogDebug("Storing light parameters for light {Light} : {LightParams}", l.EntityId, e.Old?.AttributesJson);
                         lightFsm.LastParams =

@@ -1,6 +1,8 @@
 using Microsoft.Extensions.Logging;
+using NetEntityAutomation.Core.Automations;
+using NetEntityAutomation.Core.Configs;
 
-namespace NetEntityAutomation.Core.Configs;
+namespace NetEntityAutomation.Core.RoomManager;
 
 public interface IRoom;
 
@@ -13,7 +15,6 @@ public interface IRoomConfig : IRoom
     /// Name of the room.
     /// </summary>
     public string Name => GetType().Name;
-    
     /// <summary>
     /// Logger to be used by the room.
     /// This is externally useful for debugging and logging.
@@ -21,9 +22,9 @@ public interface IRoomConfig : IRoom
     public ILogger Logger { get; set; }
     /// <summary>
     /// A list of automation configurations that will be used by the room.
-    /// See <see cref="AutomationConfig"/> for more details.
+    /// See <see cref="IAutomationConfig"/> for more details.
     /// </summary>
-    public IEnumerable<AutomationConfig> Entities { get; set; }
+    public IEnumerable<AutomationBase> Entities { get; set; }
     
     /// <summary>
     /// Night mode for the room.
