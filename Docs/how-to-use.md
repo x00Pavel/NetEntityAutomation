@@ -21,13 +21,16 @@ Configuration class is used to define rooms and entities that are present in spe
 Following example illustrates how to define a room configuration:
 
 ```csharp
+using NetEntityAutomation.Core.Automations;
+using NetEntityAutomation.Core.RoomManager;
+
 namespace nd_app.apps.HomeAutomation.Configs;
 
-public class LivingRoomConfig: IRoomConfig
+public class LivingRoomConfigV1: IRoomConfig
 {
     public string Name => "Living room";
     public ILogger Logger { get; set; }
-    public IEnumerable<AutomationConfig> Entities { get; set; }
+    public IEnumerable<AutomationBase> Entities { get; set; }
     public NightModeConfig? NightMode { get; set; }
 
     public LivingRoomConfigV1(
@@ -41,54 +44,82 @@ public class LivingRoomConfig: IRoomConfig
     )
     {
         Logger = logger;
-        var secondaryLight = new AutomationConfig
-        {   
-            AutomationType = AutomationType.SecondaryLight,
-            ServiceAccountId = personEntities.Netdaemon.Attributes?.UserId ?? "",
-            Entities = new[]
+        var mainLight = ;
+        var secondaryLight = ;
+        Entities = new List<AutomationBase>
+        {
+            new MainLightAutomationBase
             {
-                lights.LivingroomBulb,
-                lights.LedLivingRoomSonoffLed,
-            },
-            Triggers = new []
-            {
-                new MotionSensor( 
-                    new []
+                EntitiesList = new List<ILightEntityCore>
+                {
+                    lights.LivingroomBulbLight
+                },
+                Triggers = new []
+                {
+                    new MotionSensor(new []
                     {
-                        sensors.MotionSensorLivingRoomMotion,
-                        sensors.MotionSensorLivingRoom2Motion
+                        sensors.LivingRoomMotionSensorMotion,
+                        sensors.LivingRoomMotionSensor1Motion
                     }, context)
+                },
+                WaitTime = TimeSpan.FromHours(1)
             },
-            NightMode = new NightModeConfig
+            new LightAutomationBase
+            {   
+                EntitiesList = new List<ILightEntityCore>
+                {
+                    lights.LivingroomBulb,
+                    lights.LedLivingRoomSonoffLed,
+                },
+                Triggers = new []
+                {
+                    new MotionSensor( 
+                        new[]
+                        {
+                            sensors.LivingRoomMotionSensor1Motion,
+                            sensors.LivingRoomMotionSensorMotion
+                        }, context)
+                },
+                ServiceAccountId = personEntities.Netdaemon.Attributes?.UserId ?? "",
+                WaitTime = TimeSpan.FromMinutes(20),
+                SwitchTimer = TimeSpan.FromHours(1),
+                StopAtTimeFunc = () => DateTime.Parse(sun.Sun.Attributes?.NextDawn ?? "06:00:00").TimeOfDay,
+                StartAtTimeFunc = () =>
+                    DateTime.Parse(sun.Sun.Attributes?.NextDusk ?? "20:00:00").TimeOfDay -
+                    TimeSpan.FromMinutes(30),
+                NightMode = new NightModeConfig
+                {
+                    IsEnabled = true,
+                    Devices = new List<ILightEntityCore>
+                    {
+                        lights.LivingroomBulb,
+                    },
+                    StartAtTimeFunc = () => DateTime.Parse("23:00:00").TimeOfDay
+                }
+            },
+            new BlindAutomationBase
             {
-                IsEnabled = true,
+                Sun = sun.Sun,
+                EntitiesList = new List<ICoverEntityCore>
+                {
+                    covers.LivingRoomBlinds1Cover,
+                },
+                StartAtTimeFunc = null,
+                StopAtTimeFunc = null
             }
-        };
-        var blinds = new AutomationConfig
-        {
-            AutomationType = AutomationType.Blinds,
-            Entities = new Entity[]
-            {
-                covers.LumiLumiCurtainAcn002Cover,
-                sun.Sun
-            }
-        };
-        Entities = new List<AutomationConfig>
-        {
-            secondaryLight,
-            blinds
         };
     }
 }
 ```
 
 In the example above, `LivingRoomConfig` class is used to define a living room.
-Abstracting from the details, it contains a list of entities that are grouped for a specific automation scenario: secondary light and blinds.
-Each entity is represented by an instance of `AutomationConfig` class.
-`AutomationConfig` class contains information about the entity, its triggers, and other settings that are specific to the automation scenario.
-There is more options available in `AutomationConfig` class, but the example above shows the most common ones.
+Abstracting from the details, it contains a list of entities that are grouped for a specific automation scenario: main light, secondary light and blinds.
+Each entity is represented by an instance of `AutomationBase` class.
+`AutomationBase` class contains information about the entity, its triggers, and other settings that are specific to the automation scenario.
+There is more options available in `AutomationBase` class, but the example above shows the most common ones.
+This class should be inherited in order to define a custom automation scenario.
 
 > This configuration might not be ideal and might change in the future.
 > It is recommended to check the latest version of the library to see the most up-to-date configuration.
 
-More datailed information about configuration classes and their properties can be found in the API documentation.
+More detailed information about configuration classes and their properties can be found in the API documentation.
