@@ -30,11 +30,9 @@ public struct LightStateActivateAction
     public Action<LightFsmBase> OffBySwitchAction { get; init; }
     
 }
-public class LightFsmBase : FsmBase<LightState, LightTrigger>
+public class LightFsmBase : FsmBase<LightState, LightTrigger, ILightEntityCore>
 {
     public LightParameters? LastParams;
-    public new ILightEntityCore Entity { get; init; }
-
     public LightFsmBase(ILightEntityCore light, ILogger logger) : base(logger)
     {
         DefaultState = LightState.Off;
