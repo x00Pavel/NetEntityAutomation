@@ -30,10 +30,8 @@ public struct BlindsStateActivateAction
     public Action CloseManuallyAction { get; init; }
 }
 
-public class BlindsFsm : FsmBase<BlindsState, BlindsTrigger>
+public class BlindsFsm : FsmBase<BlindsState, BlindsTrigger, ICoverEntityCore>
 {
-    // private new ICoverEntityCore Entity { get; set; }
-
     public BlindsFsm(ILogger logger, ICoverEntityCore blinds) : base(logger)
     {
         Logger = logger;

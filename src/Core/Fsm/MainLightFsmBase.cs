@@ -25,9 +25,8 @@ public struct MainLightActivateAction
     public Action<MainLightFsmBase> OnAction { get; init; }
 }
 
-public class MainLightFsmBase : FsmBase<MainLightState, MainLightTrigger>
+public class MainLightFsmBase : FsmBase<MainLightState, MainLightTrigger, ILightEntityCore>
 {
-    public new ILightEntityCore Entity { get; init; }
     public MainLightFsmBase(ILightEntityCore light, ILogger logger) : base(logger)
     {
         DefaultState = MainLightState.Off;

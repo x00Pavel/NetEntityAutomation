@@ -17,13 +17,11 @@ public static class FsmBaseExtensionMethods
     public static void FireAllOff(this IEnumerable<IFsmBase> state)
     {
         foreach (var fsm in state)
-        {
             fsm.FireAllOff();
-        }
     }
 }
 
-public abstract class FsmBase<TState, TTrigger>(ILogger logger): IFsmBase
+public abstract class FsmBase<TState, TTrigger, TEntity>(ILogger logger): IFsmBase
 {
     protected StateMachine<TState, TTrigger> _fsm;
     protected ILogger Logger = logger;
@@ -31,7 +29,7 @@ public abstract class FsmBase<TState, TTrigger>(ILogger logger): IFsmBase
     public TState State => _fsm.State;
     protected TState DefaultState;
     public bool IsEnabled { get; set; } = true;
-    public IEntityCore Entity { get; init; }
+    public TEntity Entity { get; init; }
     protected string StorageDir => $"storage/{GetType().Name}";
     protected string StoragePath { get; init; }
 

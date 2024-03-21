@@ -18,7 +18,7 @@ public abstract class AutomationBase: IAutomationConfig
     public event EventHandler<bool>? IsEnabledChanged;
     public IEnumerable<IStateChangeTrigger> Triggers { get; set; }
     public IEnumerable<ICondition> Conditions { get; set; } = new []{new DefaultCondition()};
-    public string ServiceAccountId { get; set; }
+    public required string ServiceAccountId { get; set; }
     public TimeSpan WaitTime { get; set; }
     public TimeSpan SwitchTimer { get; set; }
     public Func<TimeSpan>? StopAtTimeFunc { get; set; }
@@ -38,6 +38,17 @@ public abstract class AutomationBase: IAutomationConfig
             IsEnabledChanged?.Invoke(this, value);
         }
     }
+
+    /// <summary>
+    /// Helper observable for making actions when automation is disabled.
+    /// </summary>
+    public IObservable<bool> AutomationDisabled => IsEnabledObserver.Where(enabled => !enabled);
+
+    /// <summary>
+    /// Helper observable for making actions when automation is enabled.
+    /// </summary>
+    public IObservable<bool> AutomationEnabled => IsEnabledObserver.Where(enabled => enabled);
+
     protected AutomationBase()
     {
         IsEnabledObserver = Observable.FromEventPattern<bool>(
@@ -45,19 +56,7 @@ public abstract class AutomationBase: IAutomationConfig
             handler => IsEnabledChanged -= handler
         ).Select(pattern => pattern.EventArgs);
     }
-}
 
-/// <summary>
- /// This class represents a base for all automations.
- /// The automation works with certain type of entities and uses Finite State Machine to store and represent the state of the entities.
- /// </summary>
- /// <typeparam name="TEntity">Type of entities an automation will work with</typeparam>
- /// <typeparam name="TFsm">Type of Finite State Machine that will be used for storing and representing the state of TEntity</typeparam>
-public abstract class AutomationBase<TEntity, TFsm>: AutomationBase
-{
-    public List<TEntity> EntitiesList { get; set; }
-    protected List<TFsm> FsmList { get; } = [];
-    
     /// <summary>
     /// Helper method to trigger an event at a specific time of the day.
     /// It uses Observable.Timer to trigger the event.
@@ -75,32 +74,14 @@ public abstract class AutomationBase<TEntity, TFsm>: AutomationBase
         });
         Logger.LogDebug("Triggering first event in {Time}", triggerIn);
     }
-    
-    /// <summary>
-    /// Creates a Finite State Machine for each entity in the room.
-    /// </summary>
-    protected void CreateFsm()
-    {
-        Logger.LogDebug("Configuring {FsmName} ", typeof(TFsm).Name);
-        foreach (var entity in EntitiesList)
-            FsmList.Add(ConfigureFsm(entity));
-    }
-    
-    /// <summary>
-    /// Abstract method to configure a Finite State Machine for a specific entity.
-    /// Each automation have to implement this method to configure the Finite State Machine for the specific entity.
-    /// </summary>
-    /// <param name="entity"></param>
-    /// <returns></returns>
-    protected abstract TFsm ConfigureFsm(TEntity entity);
-    
+
     /// <summary>
     /// Observable for all state changes of a specific entity.
     /// </summary>
     /// <param name="id">HomeAssistant ID of the entity</param>
     /// <returns>Observable of StateChange</returns>
     protected IObservable<StateChange> EntityEvent(string id) => Context.StateAllChanges().Where(e => e.New?.EntityId == id);
-    
+
     /// <summary>
     /// Observable for all state changes of a specific entity initiated by a user.
     /// 
@@ -122,7 +103,7 @@ public abstract class AutomationBase<TEntity, TFsm>: AutomationBase
     /// <returns></returns>
     protected IObservable<StateChange> AutomationEvent(string id) => EntityEvent(id)
         .Where(e => e.IsAutomationInitiated(ServiceAccountId));
-    
+
     /// <summary>
     /// Helper function to choose between two actions based on a condition.
     /// Practically, it is a shorthand for if-else statement or a ternary operator.
@@ -131,17 +112,7 @@ public abstract class AutomationBase<TEntity, TFsm>: AutomationBase
     /// <param name="action">Action if condition == true</param>
     /// <param name="elseAction">Action on else branch</param>
     protected static void ChooseAction(bool condition, Action action, Action elseAction) => (condition ? action : elseAction)();
-    
-    /// <summary>
-    /// Helper observable for making actions when automation is disabled.
-    /// </summary>
-    public IObservable<bool> AutomationDisabled => IsEnabledObserver.Where(enabled => !enabled);
-    
-    /// <summary>
-    /// Helper observable for making actions when automation is enabled.
-    /// </summary>
-    public IObservable<bool> AutomationEnabled => IsEnabledObserver.Where(enabled => enabled);
-    
+
     protected bool IsWorkingHours()
     {
         if (NightMode is { StartAtTimeFunc: not null, StopAtTimeFunc: not null })
@@ -162,4 +133,38 @@ public abstract class AutomationBase<TEntity, TFsm>: AutomationBase
         action();
         return null;
     }
+}
+
+public abstract class AutomationBase<TEntity> : AutomationBase
+{
+    public List<TEntity> EntitiesList { get; set; }
+}
+
+/// <summary>
+ /// This class represents a base for all automations.
+ /// The automation works with certain type of entities and uses Finite State Machine to store and represent the state of the entities.
+ /// </summary>
+ /// <typeparam name="TEntity">Type of entities an automation will work with</typeparam>
+ /// <typeparam name="TFsm">Type of Finite State Machine that will be used for storing and representing the state of TEntity</typeparam>
+public abstract class AutomationBase<TEntity, TFsm>: AutomationBase<TEntity>
+{
+    protected List<TFsm> FsmList { get; } = [];
+
+    /// <summary>
+    /// Creates a Finite State Machine for each entity in the room.
+    /// </summary>
+    protected void CreateFsm()
+    {
+        Logger.LogDebug("Configuring {FsmName} ", typeof(TFsm).Name);
+        foreach (var entity in EntitiesList)
+            FsmList.Add(ConfigureFsm(entity));
+    }
+    
+    /// <summary>
+    /// Abstract method to configure a Finite State Machine for a specific entity.
+    /// Each automation have to implement this method to configure the Finite State Machine for the specific entity.
+    /// </summary>
+    /// <param name="entity"></param>
+    /// <returns></returns>
+    protected abstract TFsm ConfigureFsm(TEntity entity);
 }
