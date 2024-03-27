@@ -1,4 +1,4 @@
-# HOWTO Use NetEntityAutomation Library
+# How To Use NetEntityAutomation Library
 
 NetEntityAutomation library provides a set of ready-to-use automation scenarios.
 It is designed to be used with [NetDaemon](https://netdaemon.xyz/) framework.

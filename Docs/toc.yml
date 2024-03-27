@@ -1,0 +1,8 @@
+items:
+  - name: How To Use
+    href: how-to-use.md
+  - name: Advanced
+    items:
+      - href: Advanced/room-service.md
+      - name: Custom Automation
+        href: Advanced/custom-automation.md
