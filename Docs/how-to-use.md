@@ -123,3 +123,4 @@ This class should be inherited in order to define a custom automation scenario.
 > It is recommended to check the latest version of the library to see the most up-to-date configuration.
 
 More detailed information about configuration classes and their properties can be found in the API documentation.
+All available automations are described in the [automations](/Docs/Automations/main-light-automation.html) docs.

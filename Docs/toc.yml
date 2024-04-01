@@ -6,3 +6,5 @@ items:
       - href: Advanced/room-service.md
       - name: Custom Automation
         href: Advanced/custom-automation.md
+  - name: Automations
+    href: Automations/toc.yml
