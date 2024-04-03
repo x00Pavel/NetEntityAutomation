@@ -21,20 +21,34 @@ public class Room
         _haContext = haContext;
         InitAutomations();
         InitServices();
+        // InitSensors();
     }
 
     private void InitServices()
     {
         var serviceName = _roomConfig.Name.ToLower().Replace(' ', '_') + "_service";
         _haContext.RegisterServiceCallBack<RoomData>("toggle_" + serviceName, data =>
-        {   
-            _automations.ForEach(auto =>
+        {
+            if (data.Automation != null)
             {
-                auto.IsEnabled = !auto.IsEnabled;
+                var automationClass = GetType().Assembly.GetTypes().First(t => t.Name == data.Automation);
+                var automation = _automations.First(a => a.GetType() == automationClass);
+                automation.IsEnabled = !automation.IsEnabled;
                 _roomConfig.Logger.LogDebug("Toggling automation {AutomationName} to {IsEnabled}", 
-                    auto.GetType().Name,
-                    auto.IsEnabled ? "enabled" : "disabled");
-            });
+                    automation.GetType().Name,
+                    automation.IsEnabled ? "enabled" : "disabled");
+            }
+            else
+            {
+                _automations.ForEach(auto =>
+                {
+                    auto.IsEnabled = !auto.IsEnabled;
+                    _roomConfig.Logger.LogDebug("Toggling automation {AutomationName} to {IsEnabled}", 
+                        auto.GetType().Name,
+                        auto.IsEnabled ? "enabled" : "disabled");
+                });     
+            }
+           
         });
         _roomConfig.Logger.LogDebug("Service {ServiceName} initialised", serviceName);
     }
@@ -56,4 +70,5 @@ public class Room
 
 internal record RoomData
 {
+    public string? Automation { get; set; }
 }
