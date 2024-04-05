@@ -1,4 +1,5 @@
 using Microsoft.Extensions.Logging;
+using NetDaemon.Extensions.MqttEntityManager;
 using NetDaemon.HassModel;
 
 namespace NetEntityAutomation.Core.RoomManager;
@@ -14,12 +15,12 @@ public class RoomManager : IRoomManager
     private readonly List<IRoomConfig> configs;
     private readonly IHaContext haContext;
 
-    public RoomManager(IHaContext context, ILogger<RoomManager> logger, IEnumerable<IRoomConfig> rooms)
+    public RoomManager(IHaContext context, ILogger<RoomManager> logger, IEnumerable<IRoomConfig> rooms, IMqttEntityManager entityManager)
     {
         logger.LogInformation("Initialising room manager");
         haContext = context ?? throw new ArgumentNullException(nameof(context));
         configs = rooms.ToList();
-        configs.ForEach(config =>  _rooms.Add(new Room(config, haContext)));
+        configs.ForEach(config =>  _rooms.Add(new Room(config, haContext, entityManager)));
         logger.LogInformation("Number of rooms: {RoomCount}", configs.Count);
     }
 }
