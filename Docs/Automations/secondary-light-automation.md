@@ -29,7 +29,8 @@ and triggers
 - `AllOff`
 
 State diagram:
-![NetEntityAutomation Secondary light automation FSM](Docs/Diagrams/Perepherial-light-FSM.png "Secondary light automation FSM")
+
+![NetEntityAutomation Secondary light automation FSM](~/Docs/Diagrams/Perepherial-light-FSM.svg "Secondary light automation FSM")
 
 
 Single automation object can include several light entities that will be controlled.
