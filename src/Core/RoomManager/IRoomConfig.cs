@@ -24,7 +24,7 @@ public interface IRoomConfig : IRoom
     /// A list of automation configurations that will be used by the room.
     /// See <see cref="IAutomationConfig"/> for more details.
     /// </summary>
-    public IEnumerable<AutomationBase> Entities { get; set; }
+    public IEnumerable<AutomationBase> AutomationList { get; set; }
     
     /// <summary>
     /// Night mode for the room.

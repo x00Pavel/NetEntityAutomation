@@ -10,7 +10,7 @@ jobs:
     name: build, pack & publish
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
        
       - name: Get version from tag
         uses: nowsprinting/check-version-format-action@v3

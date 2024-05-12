@@ -42,7 +42,7 @@ public class Room
     private void InitAutomations()
     {
         _roomConfig.Logger.LogDebug("Creating automations");
-        foreach (var automation in _roomConfig.Entities)
+        foreach (var automation in _roomConfig.AutomationList)
         { 
             _roomConfig.Logger.LogDebug("Creating {AutomationType}", automation.GetType().Name);
             automation.Context = _haContext;
